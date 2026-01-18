@@ -6,6 +6,8 @@ import com.nguyenhuugiap.computer_shop.entity.Role;
 import com.nguyenhuugiap.computer_shop.entity.User;
 import com.nguyenhuugiap.computer_shop.entity.UserRole;
 import com.nguyenhuugiap.computer_shop.enums.RoleType;
+import com.nguyenhuugiap.computer_shop.exception.AppException;
+import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.mapper.UserMapper;
 import com.nguyenhuugiap.computer_shop.repository.RoleRepository;
 import com.nguyenhuugiap.computer_shop.repository.UserRepository;
@@ -28,14 +30,14 @@ public class UserService {
     @Transactional
     public UserResponse createUser(UserCreationRequest request){
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("User already exists");
+            throw new AppException(ErrorCode.USER_EXISTS);
         }
         User user = userMapper.toEntity(request);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         // Gan quyen cho user, mac dinh la USER
         Role userRole = roleRepository.findByName(RoleType.USER.name())
-                .orElseThrow(()-> new RuntimeException("Khong tim thay ROLE user"));
+                .orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_FOUND));
         user.addRole(userRole);
         userRepository.save(user);
         return userMapper.toResponse(user);
