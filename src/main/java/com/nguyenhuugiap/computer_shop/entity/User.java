@@ -46,14 +46,12 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     Set<UserRole> userRoles = new HashSet<>();
-    public void addRole(Role role){
-        UserRole userRole = UserRole.builder()
-                .id(new UserRoleId(this.id, role.getId()))
-                .user(this)
-                .role(role)
-                .build();
-        if(this.userRoles == null) this.userRoles = new HashSet<>();
+    public void addRole(Role role) {
+        UserRole userRole = new UserRole();
+        userRole.setUser(this);
+        userRole.setRole(role);
         this.userRoles.add(userRole);
     }
+
 
 }
