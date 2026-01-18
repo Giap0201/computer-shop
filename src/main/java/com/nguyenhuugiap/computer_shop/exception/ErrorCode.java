@@ -16,7 +16,6 @@ public enum ErrorCode {
     USER_NOT_FOUND(1003, "User not found", HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1004, "Username must be at least 3 characters", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID(1005, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
-
     //ROLE
     ROLE_NOT_FOUND(1006, "Role not found", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
