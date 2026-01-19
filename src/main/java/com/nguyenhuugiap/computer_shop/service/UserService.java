@@ -4,7 +4,6 @@ import com.nguyenhuugiap.computer_shop.dto.request.UserCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.UserResponse;
 import com.nguyenhuugiap.computer_shop.entity.Role;
 import com.nguyenhuugiap.computer_shop.entity.User;
-import com.nguyenhuugiap.computer_shop.entity.UserRole;
 import com.nguyenhuugiap.computer_shop.enums.RoleType;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
@@ -28,8 +27,8 @@ public class UserService {
     PasswordEncoder passwordEncoder;
 
     @Transactional
-    public UserResponse createUser(UserCreationRequest request){
-        if(userRepository.existsByEmail(request.getEmail())){
+    public UserResponse createUser(UserCreationRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTS);
         }
         User user = userMapper.toEntity(request);
@@ -37,7 +36,7 @@ public class UserService {
 
         // Gan quyen cho user, mac dinh la USER
         Role userRole = roleRepository.findByName(RoleType.USER.name())
-                .orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         user.addRole(userRole);
         userRepository.save(user);
         return userMapper.toResponse(user);

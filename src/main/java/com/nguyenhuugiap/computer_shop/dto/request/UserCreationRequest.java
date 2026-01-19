@@ -1,5 +1,7 @@
 package com.nguyenhuugiap.computer_shop.dto.request;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
+    @Email(message = "EMAIL_INVALID")
+    @NotBlank(message = "EMAIL_INVALID")
     String email;
     String password;
     String phone;

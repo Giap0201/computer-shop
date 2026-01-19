@@ -4,6 +4,7 @@ import com.nguyenhuugiap.computer_shop.dto.request.UserCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.UserResponse;
 import com.nguyenhuugiap.computer_shop.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +22,7 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    public ApiResponse<UserResponse> createUser(@RequestBody UserCreationRequest request) {
+    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request)).build();
     }
