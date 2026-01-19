@@ -4,26 +4,31 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 
 public enum ErrorCode {
-    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_KEY (1001, "Uncategorized error", HttpStatus.BAD_REQUEST), // Loi sai key
-    //USER
-    USER_EXISTS(1002, "User already exists", HttpStatus.BAD_REQUEST),
-    USER_NOT_FOUND(1003, "User not found", HttpStatus.BAD_REQUEST),
-    USERNAME_INVALID(1004, "Username must be at least 3 characters", HttpStatus.BAD_REQUEST),
-    PASSWORD_INVALID(1005, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
-    EMAIL_INVALID(1006, "Email must be at least not null and have @", HttpStatus.BAD_REQUEST),
-    //ROLE
-    ROLE_NOT_FOUND(1006, "Role not found", HttpStatus.INTERNAL_SERVER_ERROR),
+    // SYSTEM(1XXX)
+    UNCATEGORIZED_EXCEPTION(1001, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_KEY (1002, "Invalid error key", HttpStatus.BAD_REQUEST), // Loi sai key
+
+    // AUTH (2XXX)
+    //USER (3XXX)
+    USER_EXISTS(3001, "User already exists", HttpStatus.BAD_REQUEST),
+    USER_NOT_FOUND(3002, "User not found", HttpStatus.NOT_FOUND),
+    USERNAME_INVALID(3003, "Username invalid", HttpStatus.BAD_REQUEST),
+    PASSWORD_INVALID(3004, "Password invalid", HttpStatus.BAD_REQUEST),
+    EMAIL_INVALID(3005, "Email invalid", HttpStatus.BAD_REQUEST),
+    PHONE_INVALID(1007, "Phone invalid", HttpStatus.BAD_REQUEST),
+
+    //ROLE (35xx))
+    ROLE_NOT_FOUND(3501, "Role not found", HttpStatus.NOT_FOUND),
     ;
 
     private int code;
     private String message;
-    private HttpStatus statusCode;
-
+    private HttpStatusCode httpStatusCode;
 }

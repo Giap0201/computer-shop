@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
                 .build();
-        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+        return ResponseEntity.status(errorCode.getHttpStatusCode()).body(apiResponse);
     }
 
 
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
                 .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())
                 .build();
         return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION
-                .getStatusCode()).body(apiResponse);
+                .getHttpStatusCode()).body(apiResponse);
     }
 
     // Bat cac loi do minh tu dinh nghia validation
@@ -49,6 +49,6 @@ public class GlobalExceptionHandler {
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
                 .build();
-        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+        return ResponseEntity.status(errorCode.getHttpStatusCode()).body(apiResponse);
     }
 }
