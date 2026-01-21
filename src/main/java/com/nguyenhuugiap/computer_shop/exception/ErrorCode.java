@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 
 public enum ErrorCode {
     // SYSTEM(1XXX)
@@ -22,7 +21,7 @@ public enum ErrorCode {
     USERNAME_INVALID(3003, "Username invalid", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID(3004, "Password invalid", HttpStatus.BAD_REQUEST),
     EMAIL_INVALID(3005, "Email invalid", HttpStatus.BAD_REQUEST),
-    PHONE_INVALID(1007, "Phone invalid", HttpStatus.BAD_REQUEST),
+    PHONE_INVALID(3006, "Phone invalid", HttpStatus.BAD_REQUEST),
 
     //ROLE (35xx))
     ROLE_NOT_FOUND(3501, "Role not found", HttpStatus.NOT_FOUND),

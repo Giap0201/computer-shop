@@ -1,7 +1,6 @@
 package com.nguyenhuugiap.computer_shop.enums;
 
-public enum ProductStatus {
+public enum CategoryStatus {
     ACTIVE,
-    INACTIVE,
-    OUT_OF_STOCK
+    HIDDEN
 }
