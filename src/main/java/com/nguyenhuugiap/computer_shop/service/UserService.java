@@ -26,6 +26,7 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
+    // Tao user
     @Transactional
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -41,4 +42,8 @@ public class UserService {
         userRepository.save(user);
         return userMapper.toResponse(user);
     }
+
+    // Lay user
+//    public UserResponse getUser()
+
 }

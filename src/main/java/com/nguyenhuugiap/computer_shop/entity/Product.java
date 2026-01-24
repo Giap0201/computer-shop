@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -29,6 +31,8 @@ public class Product extends BaseEntity {
     String description;
     @Enumerated(EnumType.STRING)
     ProductStatus status;
+    @Column(precision = 15, scale = 2, nullable = false)
+    BigDecimal price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
