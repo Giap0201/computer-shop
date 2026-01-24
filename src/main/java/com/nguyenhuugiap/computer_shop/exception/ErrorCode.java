@@ -25,8 +25,11 @@ public enum ErrorCode {
 
     //ROLE (35xx))
     ROLE_NOT_FOUND(3501, "Role not found", HttpStatus.NOT_FOUND),
-    ;
 
+
+    //BRAND (4xxx)
+    BRAND_EXISTS(4001, "Brand already exists", HttpStatus.BAD_REQUEST)
+    ;
     private int code;
     private String message;
     private HttpStatusCode httpStatusCode;
