@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @Entity
 @Getter
@@ -34,23 +36,37 @@ public class Category extends BaseEntity {
     String name;
     @Column(nullable = false, unique = true)
     String slug;
+    @Column(columnDefinition = "TEXT")
+    String description;
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    CategoryStatus status;
+    CategoryStatus status = CategoryStatus.ACTIVE;
     @Builder.Default
     @ToString.Exclude
-    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     Set<Product> products = new HashSet<>();
 
-    // Tu dong tao slug khi khong set
+    // tu dong tao slug
     @PrePersist
-    private void prePersist() {
-        // Tao slug tu  name, neu ma slug khong co -> tao moi
-        if (this.name != null && this.slug == null) {
-            this.slug = this.name.toLowerCase()
-                    .replace(" ", "-")
-                    .replace("đ", "d")
-                    .replace("Đ", "d")
-                    .replaceAll("[^a-z0-9-]", "");
+    @PreUpdate
+    private void generateSlug() {
+        if (this.slug == null && this.name != null && !this.name.isEmpty()) {
+            slug = toSlug(name);
         }
     }
+
+    private String toSlug(String input) {
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+        String str = input.toLowerCase();
+        str = str.replaceAll("đ", "d");
+        String normalizer = Normalizer.normalize(str, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        str = pattern.matcher(normalizer).replaceAll("");
+        str = str.replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-");
+        return str;
+    }
+
 }
