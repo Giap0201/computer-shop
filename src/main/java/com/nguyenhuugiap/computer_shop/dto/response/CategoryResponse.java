@@ -14,8 +14,10 @@ import java.util.Set;
 public class CategoryResponse {
     Long id;
     String name;
+    String description;
     CategoryStatus status;
     String slug;
     Set<CategoryResponse> children;
     Long parentId;
+    String parentName;
 }
