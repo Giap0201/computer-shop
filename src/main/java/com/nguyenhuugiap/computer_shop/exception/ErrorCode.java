@@ -33,7 +33,8 @@ public enum ErrorCode {
     //CATEGORY (45XX)
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục không được bỏ trống", HttpStatus.BAD_REQUEST),
     CATEGORY_TOO_LONG(4502, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
-
+    CATEGORY_EXISTS(4503, "Tên danh mục đã tồn tại", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_FOUND(4504, "Danh mục cha không tồn tại", HttpStatus.BAD_REQUEST),
     ;
     private int code;
     private String message;

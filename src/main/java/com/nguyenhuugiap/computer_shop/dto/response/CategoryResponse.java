@@ -1,5 +1,6 @@
 package com.nguyenhuugiap.computer_shop.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nguyenhuugiap.computer_shop.enums.CategoryStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -11,6 +12,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryResponse {
     Long id;
     String name;
