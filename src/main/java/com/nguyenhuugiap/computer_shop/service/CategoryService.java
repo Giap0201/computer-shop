@@ -41,4 +41,10 @@ public class CategoryService {
         return categoryRepository.findAll().stream()
                 .map(categoryMapper::toResponse).toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getCategoryRoots(){
+        return categoryRepository.findAllRoots()
+                .stream().map(categoryMapper::toResponse).toList();
+    }
 }

@@ -29,7 +29,7 @@ public class CategoryController {
     @GetMapping
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         return ApiResponse.<List<CategoryResponse>>builder()
-                .result(categoryService.getAllCategories())
+                .result(categoryService.getCategoryRoots())
                 .build();
     }
 }
