@@ -1,11 +1,14 @@
 package com.nguyenhuugiap.computer_shop.exception;
 
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -28,9 +31,22 @@ public class GlobalExceptionHandler {
                 .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
                 .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())
                 .build();
+        log.error(runtimeException.getMessage(), runtimeException);
         return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION
                 .getHttpStatusCode()).body(apiResponse);
     }
+
+    // Bat cac loi du lieu (Long, Integer khi sua xoa ma truyen chu)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ApiResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException methodArgumentTypeMismatchException) {
+        ApiResponse apiResponse = ApiResponse.builder()
+                .code(ErrorCode.VALIDATION_FAILED.getCode())
+                .message(ErrorCode.VALIDATION_FAILED.getMessage())
+                .build();
+        return ResponseEntity.status(ErrorCode.VALIDATION_FAILED
+                .getHttpStatusCode()).body(apiResponse);
+    }
+
 
     // Bat cac loi do minh tu dinh nghia validation
     @ExceptionHandler(value = MethodArgumentNotValidException.class)

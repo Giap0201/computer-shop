@@ -13,6 +13,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     // Gay ra loi N+1 query
 //    List<Category> findByParentIsNull();
     // Su dung Join Fetch
-    @Query("select c from Category  c left join fetch c.children where c.parent is null ")
+    @Query("select distinct c from Category  c left join fetch c.children where c.parent is null ")
     List<Category> findAllRoots();
+
+    boolean existsByParentId(long id);
 }

@@ -2,7 +2,6 @@ package com.nguyenhuugiap.computer_shop.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
@@ -12,8 +11,8 @@ import org.springframework.http.HttpStatusCode;
 public enum ErrorCode {
     // SYSTEM(1XXX)
     UNCATEGORIZED_EXCEPTION(1001, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_KEY (1002, "Invalid error key", HttpStatus.BAD_REQUEST), // Loi sai key
-
+    INVALID_KEY(1002, "Invalid error key", HttpStatus.BAD_REQUEST), // Loi sai key
+    VALIDATION_FAILED(1003, "Dữ liệu đầu vào không hợp lệ", HttpStatus.BAD_REQUEST),
     // AUTH (2XXX)
     //USER (3XXX)
     USER_EXISTS(3001, "Đã tồn tại user", HttpStatus.BAD_REQUEST),
@@ -35,6 +34,7 @@ public enum ErrorCode {
     CATEGORY_TOO_LONG(4502, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
     CATEGORY_EXISTS(4503, "Tên danh mục đã tồn tại", HttpStatus.BAD_REQUEST),
     CATEGORY_NOT_FOUND(4504, "Danh mục cha không tồn tại", HttpStatus.BAD_REQUEST),
+    CANNOT_DELETE_HAS_CHILDREN(4505, "Không thể xoá danh mục do đang có con", HttpStatus.BAD_REQUEST),
     ;
     private int code;
     private String message;

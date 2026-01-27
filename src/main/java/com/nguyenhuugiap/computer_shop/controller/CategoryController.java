@@ -3,7 +3,7 @@ package com.nguyenhuugiap.computer_shop.controller;
 import com.nguyenhuugiap.computer_shop.dto.request.CategoryRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
-import com.nguyenhuugiap.computer_shop.service.CategoryService;
+import com.nguyenhuugiap.computer_shop.service.interfaces.CategoryService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,22 @@ public class CategoryController {
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         return ApiResponse.<List<CategoryResponse>>builder()
                 .result(categoryService.getCategoryRoots())
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<CategoryResponse> getCategoryById(@PathVariable Long id) {
+        return ApiResponse.<CategoryResponse>builder()
+                .result(categoryService.getCategoryById(id))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+
+    public ApiResponse<Void> deleteCategoryById(@PathVariable Long id) {
+        categoryService.deleteCategoryById(id);
+        return ApiResponse.<Void>builder()
+                .message("Đã xoá thành công")
                 .build();
     }
 }
