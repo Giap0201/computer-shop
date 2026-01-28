@@ -1,6 +1,6 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
-import com.nguyenhuugiap.computer_shop.dto.request.CategoryRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.CategoryCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.entity.Category;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
@@ -25,7 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryResponse createCategory(CategoryRequest request) {
+    public CategoryResponse createCategory(CategoryCreationRequest request) {
         if (categoryRepository.existsByName(request.getName())) {
             throw new AppException(ErrorCode.CATEGORY_EXISTS);
         }

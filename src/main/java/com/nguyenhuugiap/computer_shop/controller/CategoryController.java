@@ -1,6 +1,6 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
-import com.nguyenhuugiap.computer_shop.dto.request.CategoryRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.CategoryCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.CategoryService;
@@ -20,7 +20,7 @@ public class CategoryController {
     CategoryService categoryService;
 
     @PostMapping
-    public ApiResponse<CategoryResponse> createCategory(@RequestBody @Valid CategoryRequest categoryRequest) {
+    public ApiResponse<CategoryResponse> createCategory(@RequestBody @Valid CategoryCreationRequest categoryRequest) {
         return ApiResponse.<CategoryResponse>builder()
                 .result(categoryService.createCategory(categoryRequest))
                 .build();

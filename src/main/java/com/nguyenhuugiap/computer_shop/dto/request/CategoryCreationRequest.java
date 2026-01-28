@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryRequest {
+public class CategoryCreationRequest {
     Long parentId;
     @NotBlank(message = "CATEGORY_NAME_REQUIRED")
     @Size(max = 100, message = "CATEGORY_TOO_LONG")
