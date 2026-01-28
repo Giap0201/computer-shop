@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
 import com.nguyenhuugiap.computer_shop.dto.request.CategoryCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.CategoryUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.CategoryService;
@@ -46,6 +47,14 @@ public class CategoryController {
         categoryService.deleteCategoryById(id);
         return ApiResponse.<Void>builder()
                 .message("Đã xoá thành công")
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<CategoryResponse> updateCategoryById(@PathVariable Long id, @RequestBody @Valid CategoryUpdateRequest updateRequest) {
+        return ApiResponse.<CategoryResponse>builder()
+                .result(categoryService.updateCategory(id, updateRequest))
+                .message("Cập nhật danh mục thành công!")
                 .build();
     }
 }

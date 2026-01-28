@@ -35,6 +35,7 @@ public enum ErrorCode {
     CATEGORY_EXISTS(4503, "Tên danh mục đã tồn tại", HttpStatus.BAD_REQUEST),
     CATEGORY_NOT_FOUND(4504, "Danh mục cha không tồn tại", HttpStatus.BAD_REQUEST),
     CANNOT_DELETE_HAS_CHILDREN(4505, "Không thể xoá danh mục do đang có con", HttpStatus.BAD_REQUEST),
+    CANNOT_UPDATE_CATEGORY(4506, "Không thể cập nhật danh mục ", HttpStatus.BAD_REQUEST),
     ;
     private int code;
     private String message;

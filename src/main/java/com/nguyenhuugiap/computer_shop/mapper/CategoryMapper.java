@@ -1,10 +1,10 @@
 package com.nguyenhuugiap.computer_shop.mapper;
 
 import com.nguyenhuugiap.computer_shop.dto.request.CategoryCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.CategoryUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.entity.Category;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
@@ -18,4 +18,7 @@ public interface CategoryMapper {
     @Mapping(source = "parent.id", target = "parentId")
     @Mapping(source = "parent.name", target = "parentName")
     CategoryResponse toResponse(Category category);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateCategory(@MappingTarget Category category, CategoryUpdateRequest categoryUpdateRequest);
 }

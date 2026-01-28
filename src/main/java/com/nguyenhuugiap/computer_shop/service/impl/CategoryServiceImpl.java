@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
 import com.nguyenhuugiap.computer_shop.dto.request.CategoryCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.CategoryUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.entity.Category;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
@@ -53,6 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -60,12 +62,42 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void deleteCategoryById(long id) {
         if (!categoryRepository.existsById(id))
             throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         if (categoryRepository.existsByParentId(id))
             throw new AppException(ErrorCode.CANNOT_DELETE_HAS_CHILDREN);
         categoryRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public CategoryResponse updateCategory(Long id,CategoryUpdateRequest request) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+        categoryMapper.updateCategory(category, request);
+        if(request.getName() != null && categoryRepository.existsByNameAndIdNot(request.getName(), id))
+            throw new AppException(ErrorCode.CATEGORY_EXISTS);
+        if(request.getParentId() != null){
+            if(request.getParentId().equals(category.getId()))
+                throw new AppException(ErrorCode.CANNOT_UPDATE_CATEGORY);
+            Category newParent = categoryRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+            if(isDescendant(category, newParent)) throw new AppException(ErrorCode.CANNOT_UPDATE_CATEGORY);
+            category.setParent(newParent);
+        }
+        return categoryMapper.toResponse(categoryRepository.save(category));
+    }
+    private boolean isDescendant(Category source, Category target) {
+        Category current = target;
+        while (current != null) {
+            if(current.getId().equals(source.getId())){
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
     }
 
 }
