@@ -73,26 +73,29 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryResponse updateCategory(Long id,CategoryUpdateRequest request) {
+    public CategoryResponse updateCategory(Long id, CategoryUpdateRequest request) {
+        System.out.println("DEBUG NAME: " + request.getName());
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
-        categoryMapper.updateCategory(category, request);
-        if(request.getName() != null && categoryRepository.existsByNameAndIdNot(request.getName(), id))
+        if (request.getName() != null && categoryRepository.existsByNameAndIdNot(request.getName(), id))
             throw new AppException(ErrorCode.CATEGORY_EXISTS);
-        if(request.getParentId() != null){
-            if(request.getParentId().equals(category.getId()))
+        if (request.getParentId() != null) {
+            if (request.getParentId().equals(category.getId()))
                 throw new AppException(ErrorCode.CANNOT_UPDATE_CATEGORY);
             Category newParent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
-            if(isDescendant(category, newParent)) throw new AppException(ErrorCode.CANNOT_UPDATE_CATEGORY);
+            if (isDescendant(category, newParent)) throw new AppException(ErrorCode.CANNOT_UPDATE_CATEGORY);
             category.setParent(newParent);
         }
+        categoryMapper.updateCategory(category, request);
+
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
+
     private boolean isDescendant(Category source, Category target) {
         Category current = target;
         while (current != null) {
-            if(current.getId().equals(source.getId())){
+            if (current.getId().equals(source.getId())) {
                 return true;
             }
             current = current.getParent();
