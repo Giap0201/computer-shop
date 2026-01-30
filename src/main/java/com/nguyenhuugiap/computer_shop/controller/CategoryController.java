@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class CategoryController {
     CategoryService categoryService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CategoryResponse> createCategory(@RequestBody @Valid CategoryCreationRequest categoryRequest) {
         return ApiResponse.<CategoryResponse>builder()
                 .result(categoryService.createCategory(categoryRequest))
@@ -42,15 +44,14 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> deleteCategoryById(@PathVariable Long id) {
         categoryService.deleteCategoryById(id);
         return ApiResponse.<Void>builder()
-                .message("Đã xoá thành công")
                 .build();
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ApiResponse<CategoryResponse> updateCategoryById(@PathVariable Long id, @RequestBody @Valid CategoryUpdateRequest updateRequest) {
         return ApiResponse.<CategoryResponse>builder()
                 .result(categoryService.updateCategory(id, updateRequest))
