@@ -50,7 +50,7 @@ public class Category extends BaseEntity {
     @PrePersist
     @PreUpdate
     private void generateSlug() {
-        if (this.slug == null && this.name != null && !this.name.isEmpty()) {
+        if (this.name != null && !this.name.isEmpty()) {
             slug = toSlug(name);
         }
     }

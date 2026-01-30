@@ -28,7 +28,10 @@ public enum ErrorCode {
 
     //BRAND (4xxx)
     BRAND_EXISTS(4001, "Thương hiệu đã tồn tại", HttpStatus.BAD_REQUEST),
-
+    BRAND_NAME_REQUIRED(4002, "Tên thương hiệu không được bỏ trống", HttpStatus.BAD_REQUEST),
+    BRAND_NAME_INVALID(4003, "Tên thương hiệu không đúng định dạng", HttpStatus.BAD_REQUEST),
+    BRAND_NOT_EXISTS(4004, "Thương hiệu không tồn tại", HttpStatus.BAD_REQUEST),
+    BRAND_NAME_EXISTS(4005, "Tên brand đã tồn tại", HttpStatus.BAD_REQUEST),
     //CATEGORY (45XX)
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục không được bỏ trống", HttpStatus.BAD_REQUEST),
     CATEGORY_TOO_LONG(4502, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
