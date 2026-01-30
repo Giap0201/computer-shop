@@ -10,8 +10,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class BrandRequest {
-    @NotBlank(message = "BRAND_NAME_REQUIRED")
+public class BrandUpdateRequest {
     @Size(max = 100, message = "BRAND_NAME_INVALID")
     String name;
     String logoUrl;
