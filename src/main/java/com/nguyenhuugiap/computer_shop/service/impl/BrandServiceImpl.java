@@ -47,7 +47,7 @@ public class BrandServiceImpl implements BrandService {
                 throw new AppException(ErrorCode.BRAND_NAME_EXISTS);
         }
         brandMapper.toUpdate(brand, request);
-        return brandMapper.toResponse(brand);
+        return brandMapper.toResponse(brandRepository.save(brand));
     }
 
     @Override
