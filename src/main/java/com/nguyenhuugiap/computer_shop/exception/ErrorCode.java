@@ -13,6 +13,8 @@ public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(1001, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1002, "Invalid error key", HttpStatus.BAD_REQUEST), // Loi sai key
     VALIDATION_FAILED(1003, "Dữ liệu đầu vào không hợp lệ", HttpStatus.BAD_REQUEST),
+    // FILES(1020)
+    INVALID_LOCATION(1020, "Invalid location", HttpStatus.INTERNAL_SERVER_ERROR),
     // AUTH (2XXX)
     //USER (3XXX)
     USER_EXISTS(3001, "Đã tồn tại user", HttpStatus.BAD_REQUEST),

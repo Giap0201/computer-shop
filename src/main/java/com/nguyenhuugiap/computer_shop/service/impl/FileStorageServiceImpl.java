@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
 import com.nguyenhuugiap.computer_shop.configuration.StorageProperties;
+import com.nguyenhuugiap.computer_shop.exception.StorageException;
 import com.nguyenhuugiap.computer_shop.service.interfaces.FileStorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,36 +13,47 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
-
     private final Path rootLocation;
 
     public FileStorageServiceImpl(StorageProperties storageProperties) {
-        if (storageProperties.getLocation().trim().isEmpty()) {
-            throw new RuntimeException("Storage location is empty");
+        String location = storageProperties.getLocation();
+        if (location == null || location.trim().isEmpty()) {
+            throw new StorageException("File upload location can not be empty.");
         }
-        this.rootLocation = Paths.get(storageProperties.getLocation());
-    }
 
+        this.rootLocation = Paths.get(location).toAbsolutePath().normalize();
+
+        try {
+            Files.createDirectories(this.rootLocation);
+        } catch (IOException e) {
+            throw new StorageException("Could not initialize storage", e);
+        }
+    }
 
     @Override
     public String storeFile(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new RuntimeException("File is empty");
+        if (file == null || file.isEmpty()) {
+            throw new StorageException("Failed to store empty file.");
         }
-        String fileName = file.getOriginalFilename();
-        int lastIndexOf = fileName.lastIndexOf(".");
+
+        String fileNameOriginal = file.getOriginalFilename();
+        if (fileNameOriginal == null || fileNameOriginal.trim().isEmpty()) {
+            throw new StorageException("Original filename is null or empty");
+        }
+        int lastIndex = fileNameOriginal.lastIndexOf(".");
         String extension = "";
-        if (lastIndexOf != -1) {
-            extension = fileName.substring(lastIndexOf);
+        if (lastIndex != -1) {
+            extension = fileNameOriginal.substring(lastIndex);
         }
         String newFileName = UUID.randomUUID().toString() + extension;
-        Path filePath = rootLocation.resolve(newFileName);
+        Path destination = this.rootLocation.resolve(newFileName);
         try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new StorageException("Failed to store file.", e);
         }
         return newFileName;
     }
