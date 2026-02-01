@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
 import com.nguyenhuugiap.computer_shop.configuration.StorageProperties;
+import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.exception.StorageException;
 import com.nguyenhuugiap.computer_shop.service.interfaces.FileStorageService;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     public FileStorageServiceImpl(StorageProperties storageProperties) {
         String location = storageProperties.getLocation();
         if (location == null || location.trim().isEmpty()) {
-            throw new StorageException("File upload location can not be empty.");
+            throw new StorageException(ErrorCode.INVALID_FILE_LOCATION);
         }
 
         this.rootLocation = Paths.get(location).toAbsolutePath().normalize();
@@ -29,19 +30,17 @@ public class FileStorageServiceImpl implements FileStorageService {
         try {
             Files.createDirectories(this.rootLocation);
         } catch (IOException e) {
-            throw new StorageException("Could not initialize storage", e);
+            throw new StorageException(e, ErrorCode.INVALID_FILE_LOCATION);
         }
     }
 
     @Override
     public String storeFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new StorageException("Failed to store empty file.");
-        }
+        if(file == null || file.isEmpty()) throw new StorageException(ErrorCode.FILE_IS_EMPTY);
 
         String fileNameOriginal = file.getOriginalFilename();
         if (fileNameOriginal == null || fileNameOriginal.trim().isEmpty()) {
-            throw new StorageException("Original filename is null or empty");
+            throw new StorageException(ErrorCode.FILE_NAME_IS_EMPTY);
         }
         int lastIndex = fileNameOriginal.lastIndexOf(".");
         String extension = "";
@@ -53,7 +52,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new StorageException("Failed to store file.", e);
+            throw new StorageException(e,ErrorCode.CANNOT_STORE_FILE);
         }
         return newFileName;
     }

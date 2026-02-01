@@ -42,7 +42,7 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public BrandResponse updateBrand(Long id, BrandUpdateRequest request) {
         Brand brand = brandRepository.findById(id).orElseThrow(() ->
-                new AppException(ErrorCode.BRAND_NOT_EXISTS));
+                new AppException(ErrorCode.BRAND_NOT_FOUND));
         if(request.getName() != null && !request.getName().isEmpty()){
             if(brandRepository.existsByNameAndIdNot(request.getName(),id))
                 throw new AppException(ErrorCode.BRAND_NAME_EXISTS);
@@ -53,7 +53,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public void deleteBrand(Long id) {
-        if (!brandRepository.existsById(id)) throw new AppException(ErrorCode.BRAND_NOT_EXISTS);
+        if (!brandRepository.existsById(id)) throw new AppException(ErrorCode.BRAND_NOT_FOUND);
         brandRepository.deleteById(id);
     }
 
@@ -61,7 +61,7 @@ public class BrandServiceImpl implements BrandService {
     @Transactional(readOnly = true)
     public BrandResponse getBrandById(Long id) {
         Brand brand = brandRepository.findById(id).orElseThrow(() ->
-                new AppException(ErrorCode.BRAND_NOT_EXISTS));
+                new AppException(ErrorCode.BRAND_NOT_FOUND));
         return brandMapper.toResponse(brand);
     }
 }
