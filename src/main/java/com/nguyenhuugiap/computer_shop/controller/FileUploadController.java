@@ -1,6 +1,8 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
+import com.nguyenhuugiap.computer_shop.configuration.StorageProperties;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.response.FileResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.FileStorageService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +19,18 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class FileUploadController {
     FileStorageService fileStorageService;
+    StorageProperties storageProperties;
 
     @PostMapping("/upload")
-    public ApiResponse<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        return ApiResponse.<String>builder()
-                .result(fileStorageService.storeFile(file))
+    public ApiResponse<FileResponse> uploadFile(@RequestParam("file") MultipartFile file) {
+        String fileLocation = storageProperties.getLocation();
+        String newFileName = fileStorageService.storeFile(file);
+        FileResponse fileResponse = FileResponse.builder()
+                .fileName(newFileName)
+                .uri("/" + fileLocation + "/" + newFileName)
+                .build();
+        return ApiResponse.<FileResponse>builder()
+                .result(fileResponse)
                 .build();
     }
 
