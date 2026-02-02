@@ -5,6 +5,7 @@ import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.exception.StorageException;
 import com.nguyenhuugiap.computer_shop.service.interfaces.FileStorageService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -12,22 +13,22 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
     private final Path rootLocation;
+    private final List<String> ALLOWED_EXTENSIONS = List.of("jpg", "jpeg", "png", "gif");
 
     public FileStorageServiceImpl(StorageProperties storageProperties) {
-        String location = storageProperties.getLocation();
-        if (location == null || location.trim().isEmpty()) {
+        String fileLocation = storageProperties.getLocation();
+        if (fileLocation == null || fileLocation.trim().isEmpty()) {
             throw new StorageException(ErrorCode.INVALID_FILE_LOCATION);
         }
-
-        this.rootLocation = Paths.get(location).toAbsolutePath().normalize();
-
+        this.rootLocation = Paths.get(fileLocation).toAbsolutePath().normalize();
         try {
-            Files.createDirectories(this.rootLocation);
+            Files.createDirectories(rootLocation);
         } catch (IOException e) {
             throw new StorageException(e, ErrorCode.INVALID_FILE_LOCATION);
         }
@@ -35,23 +36,32 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String storeFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) throw new StorageException(ErrorCode.FILE_IS_EMPTY);
-
-        String fileNameOriginal = file.getOriginalFilename();
-        if (fileNameOriginal == null || fileNameOriginal.trim().isEmpty()) {
-            throw new StorageException(ErrorCode.FILE_NAME_IS_EMPTY);
+        if (file == null || file.isEmpty()) {
+            throw new StorageException(ErrorCode.FILE_NOT_FOUND);
         }
-        int lastIndex = fileNameOriginal.lastIndexOf(".");
+        String fileNameOriginal = file.getOriginalFilename();
+        if (fileNameOriginal == null) throw new StorageException(ErrorCode.FILE_NAME_IS_EMPTY);
+        String cleanFileName = StringUtils.cleanPath(fileNameOriginal);
+
+        if (cleanFileName.contains("..")) {
+            throw new StorageException(ErrorCode.INVALID_FILE_PATH);
+        }
+        int lastIndex = cleanFileName.lastIndexOf(".");
         String extension = "";
         if (lastIndex != -1) {
-            extension = fileNameOriginal.substring(lastIndex);
+            String tmp = cleanFileName.substring(lastIndex + 1);
+            if (!ALLOWED_EXTENSIONS.contains(tmp.toLowerCase()))
+                throw new StorageException(ErrorCode.FILE_EXTENSION_NOT_SUPPORTED);
+            extension = "." + tmp;
+        } else {
+            throw new StorageException(ErrorCode.FILE_EXTENSION_NOT_SUPPORTED);
         }
         String newFileName = UUID.randomUUID().toString() + extension;
-        Path destination = this.rootLocation.resolve(newFileName);
+        Path destination = rootLocation.resolve(newFileName);
         try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, destination);
         } catch (IOException e) {
-            throw new StorageException(e, ErrorCode.CANNOT_STORE_FILE);
+            throw new StorageException(ErrorCode.CANNOT_STORE_FILE);
         }
         return newFileName;
     }

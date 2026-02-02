@@ -13,15 +13,16 @@ public enum ErrorCode {
     INVALID_KEY(1002, "Mã lỗi không hợp lệ", HttpStatus.BAD_REQUEST),
     VALIDATION_FAILED(1003, "Dữ liệu đầu vào không hợp lệ", HttpStatus.BAD_REQUEST),
 
-    // --- FILES (102X) ---
-    INVALID_FILE_LOCATION(1020, "Cấu hình thư mục lưu trữ không hợp lệ", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_IS_EMPTY(1021, "File không được để trống", HttpStatus.BAD_REQUEST),
-    FILE_NAME_IS_EMPTY(1022, "Tên file không được để trống", HttpStatus.BAD_REQUEST),
-    CANNOT_STORE_FILE(1023, "Lỗi hệ thống: Không thể lưu file", HttpStatus.INTERNAL_SERVER_ERROR),
-    CANNOT_CREATE_DIR(1024, "Lỗi hệ thống: Không thể tạo thư mục", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_TOO_LARGE(1025, "File quá lớn (Tối đa 10MB)", HttpStatus.PAYLOAD_TOO_LARGE),
-    FILE_NOT_FOUND(1026, "Không tìm thấy file hoặc đường dẫn sai", HttpStatus.NOT_FOUND),
-
+    // --- FILES (11xx) ---
+    INVALID_FILE_LOCATION(1100, "Cấu hình thư mục lưu trữ không hợp lệ", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_IS_EMPTY(1101, "File không được để trống", HttpStatus.BAD_REQUEST),
+    FILE_NAME_IS_EMPTY(1102, "Tên file không được để trống", HttpStatus.BAD_REQUEST),
+    CANNOT_STORE_FILE(1103, "Lỗi hệ thống: Không thể lưu file", HttpStatus.INTERNAL_SERVER_ERROR),
+    CANNOT_CREATE_DIR(1104, "Lỗi hệ thống: Không thể tạo thư mục", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_TOO_LARGE(1105, "File quá lớn (Tối đa 10MB)", HttpStatus.PAYLOAD_TOO_LARGE),
+    FILE_NOT_FOUND(1106, "Không tìm thấy file hoặc đường dẫn sai", HttpStatus.NOT_FOUND),
+    INVALID_FILE_PATH(1107, "Tên file chứa kí tự không hợp lệ!", HttpStatus.BAD_REQUEST),
+    FILE_EXTENSION_NOT_SUPPORTED(1108, "Định dạng file không được hỗ trợ", HttpStatus.BAD_REQUEST),
     // --- AUTH (2XXX) ---
     UNAUTHENTICATED(2001, "Bạn chưa đăng nhập", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(2002, "Bạn không có quyền truy cập", HttpStatus.FORBIDDEN),
