@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
@@ -36,7 +35,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String storeFile(MultipartFile file) {
-        if(file == null || file.isEmpty()) throw new StorageException(ErrorCode.FILE_IS_EMPTY);
+        if (file == null || file.isEmpty()) throw new StorageException(ErrorCode.FILE_IS_EMPTY);
 
         String fileNameOriginal = file.getOriginalFilename();
         if (fileNameOriginal == null || fileNameOriginal.trim().isEmpty()) {
@@ -50,9 +49,9 @@ public class FileStorageServiceImpl implements FileStorageService {
         String newFileName = UUID.randomUUID().toString() + extension;
         Path destination = this.rootLocation.resolve(newFileName);
         try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream, destination);
         } catch (IOException e) {
-            throw new StorageException(e,ErrorCode.CANNOT_STORE_FILE);
+            throw new StorageException(e, ErrorCode.CANNOT_STORE_FILE);
         }
         return newFileName;
     }
