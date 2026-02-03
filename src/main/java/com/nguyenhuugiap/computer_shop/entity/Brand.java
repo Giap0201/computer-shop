@@ -25,8 +25,7 @@ public class Brand extends BaseEntity {
     String name;
     @Column(unique = true, nullable = false)
     String slug;
-    @Column(name = "logo_url")
-    String logoUrl;
+    String logo;
 
     @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
     @ToString.Exclude

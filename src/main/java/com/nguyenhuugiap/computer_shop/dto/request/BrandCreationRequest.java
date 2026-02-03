@@ -14,5 +14,5 @@ public class BrandCreationRequest {
     @NotBlank(message = "BRAND_NAME_REQUIRED")
     @Size(max = 100, message = "BRAND_NAME_INVALID")
     String name;
-    String logoUrl;
+    String logo;
 }
