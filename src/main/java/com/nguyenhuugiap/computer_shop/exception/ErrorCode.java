@@ -34,7 +34,7 @@ public enum ErrorCode {
     PASSWORD_INVALID(3004, "Mật khẩu phải có ít nhất 8 ký tự", HttpStatus.BAD_REQUEST),
     EMAIL_INVALID(3005, "Email không đúng định dạng", HttpStatus.BAD_REQUEST),
     PHONE_INVALID(3006, "Số điện thoại không đúng định dạng", HttpStatus.BAD_REQUEST),
-
+    GENDER_INVALID(3007, "Giới tính không đúng định dạng (MALE, FEMALE, OTHER)", HttpStatus.BAD_REQUEST),
     // --- ROLE (35XX) ---
     ROLE_NOT_FOUND(3501, "Vai trò (Role) không tồn tại", HttpStatus.NOT_FOUND),
 

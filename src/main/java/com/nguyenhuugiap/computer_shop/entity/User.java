@@ -37,21 +37,24 @@ public class User extends BaseEntity {
     Gender gender;
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
-    UserStatus status;
-    @Column(name = "preferred_size", length = 50)
-    String preferredSize;
+    @Builder.Default
+    UserStatus status = UserStatus.ACTIVE;
+
     @Column(name = "deleted_at")
     LocalDateTime deletedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     Set<UserRole> userRoles = new HashSet<>();
+
     public void addRole(Role role) {
+        if(this.userRoles == null) {
+            this.userRoles = new HashSet<>();
+        }
         UserRole userRole = new UserRole();
+        userRole.setId(new UserRoleId());
         userRole.setUser(this);
         userRole.setRole(role);
-        this.userRoles.add(userRole);
+        userRoles.add(userRole);
     }
-
-
 }
