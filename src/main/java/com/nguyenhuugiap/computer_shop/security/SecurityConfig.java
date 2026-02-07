@@ -15,7 +15,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/login"};
+    private final String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/login", "/auth/token"};
     private final String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**"};
 
     @Bean

@@ -26,6 +26,7 @@ public enum ErrorCode {
     // --- AUTH (2XXX) ---
     UNAUTHENTICATED(2001, "Bạn chưa đăng nhập", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(2002, "Bạn không có quyền truy cập", HttpStatus.FORBIDDEN),
+    INVALID_CREDENTIALS(2003, "Tên đăng nhập hoặc mật khẩu sai", HttpStatus.BAD_REQUEST),
 
     // --- USER (3XXX) ---
     USER_EXISTS(3001, "Người dùng đã tồn tại", HttpStatus.BAD_REQUEST),
