@@ -41,6 +41,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
+
     @Override
     public String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -48,19 +49,19 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .subject(user.getId().toString())
                 .issuer("nguyenhuugiap.com")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()))
                 .claim("scope", "ROLE_USER")
                 .claim("jti", UUID.randomUUID().toString())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
         try {
-            byte[] keyBytes = Base64.getDecoder().decode(SIGNER_KEY);
-            jwsObject.sign(new MACSigner(keyBytes));
+            byte[] byteKeys = Base64.getDecoder().decode(SIGNER_KEY);
+            jwsObject.sign(new MACSigner(byteKeys));
             return jwsObject.serialize();
         } catch (JOSEException e) {
-            log.error("Error while generating token", e);
-            throw new RuntimeException(e);
+            log.error("Token generation failed", e);
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -68,25 +69,33 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     public AuthenticateResponse authenticate(AuthenticateRequest request) {
         User user = userRepository.findByEmail(request.getUsername()).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
-        boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
-        if (!authenticated) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash()))
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
-        }
         String token = generateToken(user);
         return AuthenticateResponse.builder()
                 .token(token)
-                .authenticated(true).build();
+                .build();
     }
 
     @Override
-    public IntrospectResponse introspect(IntrospectRequest request) throws ParseException, JOSEException {
-        String token = request.getToken();
-        SignedJWT signedJWT = SignedJWT.parse(token);
+    public IntrospectResponse introspect(IntrospectRequest request) {
+        boolean isValid = true;
+        try {
+            verifyToken(request.getToken());
+        } catch (AppException | JOSEException | ParseException e) {
+            isValid = false;
+        }
+        return IntrospectResponse.builder()
+                .valid(isValid).build();
+    }
+
+    private JWTClaimsSet verifyToken(String token) throws JOSEException, ParseException {
         byte[] keyBytes = Base64.getDecoder().decode(SIGNER_KEY);
+        SignedJWT signedJWT = SignedJWT.parse(token);
         JWSVerifier verifier = new MACVerifier(keyBytes);
         boolean verified = signedJWT.verify(verifier);
         Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
-        return IntrospectResponse.builder()
-                .valid(verified && expirationDate.after(new Date())).build();
+        if (!(verified && expirationDate.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        return signedJWT.getJWTClaimsSet();
     }
 }
