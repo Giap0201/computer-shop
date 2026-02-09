@@ -89,7 +89,8 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .valid(isValid).build();
     }
 
-    private JWTClaimsSet verifyToken(String token) throws JOSEException, ParseException {
+    @Override
+    public JWTClaimsSet verifyToken(String token) throws JOSEException, ParseException {
         byte[] keyBytes = Base64.getDecoder().decode(SIGNER_KEY);
         SignedJWT signedJWT = SignedJWT.parse(token);
         JWSVerifier verifier = new MACVerifier(keyBytes);
