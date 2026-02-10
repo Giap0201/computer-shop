@@ -4,10 +4,13 @@ package com.nguyenhuugiap.computer_shop.service.impl;
 import com.nguyenhuugiap.computer_shop.dto.request.UserCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.request.UserUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.UserResponse;
+import com.nguyenhuugiap.computer_shop.entity.Role;
 import com.nguyenhuugiap.computer_shop.entity.User;
+import com.nguyenhuugiap.computer_shop.enums.RoleType;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.mapper.UserMapper;
+import com.nguyenhuugiap.computer_shop.repository.RoleRepository;
 import com.nguyenhuugiap.computer_shop.repository.UserRepository;
 import com.nguyenhuugiap.computer_shop.service.interfaces.UserService;
 import lombok.AccessLevel;
@@ -27,6 +30,7 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    RoleRepository roleRepository;
 
     @Override
     public UserResponse createUser(UserCreationRequest userCreationRequest) {
@@ -36,17 +40,20 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_EXISTS);
         User user = userMapper.toEntity(userCreationRequest);
         user.setPasswordHash(passwordEncoder.encode(userCreationRequest.getPassword()));
+        Role roleUser = roleRepository.findByName(RoleType.USER.name()).orElseThrow(()->
+                new AppException(ErrorCode.ROLE_NOT_FOUND));
+        user.getRoles().add(roleUser);
         userRepository.save(user);
         return userMapper.toResponse(user);
     }
 
     @Override
     public UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest) {
-        if(!userRepository.existsById(id))
+        if (!userRepository.existsById(id))
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         User user = userRepository.findById(id).orElseThrow(
-                ()-> new AppException(ErrorCode.USER_NOT_FOUND));
-        if(userUpdateRequest.getPassword() != null){
+                () -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (userUpdateRequest.getPassword() != null) {
             user.setPasswordHash(passwordEncoder.encode(userUpdateRequest.getPassword()));
         }
         userRepository.save(user);
@@ -62,7 +69,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        if(!userRepository.existsById(id))
+        if (!userRepository.existsById(id))
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         userRepository.deleteById(id);
     }
@@ -78,7 +85,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(()->
+        User user = userRepository.findByEmail(email).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toResponse(user);
     }
@@ -86,7 +93,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse getUserByPhone(String phone) {
-        User user = userRepository.findByPhone(phone).orElseThrow(()->
+        User user = userRepository.findByPhone(phone).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toResponse(user);
     }
