@@ -14,7 +14,7 @@ public abstract class BrandMapper {
     String folderName;
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "products", ignore = true)
+//    @Mapping(target = "products", ignore = true)
     @Mapping(target = "slug", ignore = true)
     public abstract Brand toEntity(BrandCreationRequest request);
 

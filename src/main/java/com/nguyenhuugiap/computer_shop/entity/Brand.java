@@ -3,6 +3,8 @@ package com.nguyenhuugiap.computer_shop.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.text.Normalizer;
 import java.util.HashSet;
@@ -15,22 +17,17 @@ import java.util.regex.Pattern;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(AuditingEntityListener.class)
 public class Brand extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
     @Column(nullable = false, unique = true, length = 100)
     String name;
     @Column(unique = true, nullable = false)
     String slug;
     String logo;
 
-    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @Builder.Default
-    Set<Product> products = new HashSet<>();
+
 
     // Tu dong cap nhap slug
     @PrePersist

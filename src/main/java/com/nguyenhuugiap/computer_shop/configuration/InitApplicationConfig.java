@@ -55,9 +55,9 @@ public class InitApplicationConfig {
                         .passwordHash(passwordEncoder.encode("admin"))
                         .phone("0123456789")
                         .build();
-                admin = userRepository.save(admin);
+//                admin = userRepository.save(admin);
                 Role adminRole = roleRepository.findByName(RoleType.ADMIN.name()).get();
-                admin.addRole(adminRole);
+                admin.getRoles().add(adminRole);
                 userRepository.save(admin);
                 log.info("Admin user created with password is admin, please change your new password");
             }

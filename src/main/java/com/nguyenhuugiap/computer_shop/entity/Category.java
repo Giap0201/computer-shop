@@ -4,6 +4,8 @@ import com.nguyenhuugiap.computer_shop.enums.CategoryStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.text.Normalizer;
 import java.util.HashSet;
@@ -16,12 +18,11 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Table(name = "categories")
+@EntityListeners(AuditingEntityListener.class)
+
 public class Category extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     @ToString.Exclude
@@ -41,10 +42,10 @@ public class Category extends BaseEntity {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     CategoryStatus status = CategoryStatus.ACTIVE;
-    @Builder.Default
-    @ToString.Exclude
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-    Set<Product> products = new HashSet<>();
+//    @Builder.Default
+//    @ToString.Exclude
+//    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+//    Set<Product> products = new HashSet<>();
 
     // tu dong tao slug
     @PrePersist

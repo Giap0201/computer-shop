@@ -8,8 +8,7 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    @Mapping(target = "userRoles", ignore = true)
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "gender", source = "gender")
