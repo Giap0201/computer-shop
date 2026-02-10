@@ -22,12 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Slf4j
@@ -50,7 +52,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .issuer("nguyenhuugiap.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()))
-                .claim("scope", "ROLE_USER")
+                .claim("scope", buildScope(user))
                 .claim("jti", UUID.randomUUID().toString())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -98,5 +100,19 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
         if (!(verified && expirationDate.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
         return signedJWT.getJWTClaimsSet();
+    }
+
+    private String buildScope(User user){
+        StringJoiner scopeJoiner = new StringJoiner(" ");
+        if(!CollectionUtils.isEmpty(user.getRoles())){
+            user.getRoles().forEach(role -> {
+                String roleName = role.getName();
+                if(!roleName.startsWith("ROLE_")){
+                    roleName = "ROLE_"+roleName;
+                }
+                scopeJoiner.add(roleName);
+            });
+        }
+        return scopeJoiner.toString();
     }
 }
