@@ -1,5 +1,6 @@
 package com.nguyenhuugiap.computer_shop.security;
 
+import com.nguyenhuugiap.computer_shop.configuration.JwtAuthenticationEntryPoint;
 import com.nguyenhuugiap.computer_shop.configuration.JwtAuthenticationFilter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        httpSecurity.exceptionHandling(exceptionHandler ->
+                exceptionHandler.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         return httpSecurity.build();
     }
 
