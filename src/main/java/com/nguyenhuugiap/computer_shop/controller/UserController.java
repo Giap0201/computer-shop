@@ -4,7 +4,6 @@ import com.nguyenhuugiap.computer_shop.dto.request.UserCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.request.UserUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.UserResponse;
-import com.nguyenhuugiap.computer_shop.entity.User;
 import com.nguyenhuugiap.computer_shop.service.interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -12,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,6 +41,13 @@ public class UserController {
     public ApiResponse<UserResponse> getUserById(@PathVariable Long id) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUserById(id))
+                .build();
+    }
+
+    @GetMapping("/my-info")
+    public ApiResponse<UserResponse> getMyInfo() {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getMyInfo())
                 .build();
     }
 

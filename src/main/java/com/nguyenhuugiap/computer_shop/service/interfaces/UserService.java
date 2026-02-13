@@ -14,4 +14,5 @@ public interface UserService {
     UserResponse getUserById(Long id);
     UserResponse getUserByEmail(String email);
     UserResponse getUserByPhone(String phone);
+    UserResponse getMyInfo();
 }

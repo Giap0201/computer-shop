@@ -16,6 +16,7 @@ import com.nguyenhuugiap.computer_shop.service.interfaces.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,5 +97,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByPhone(phone).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        Long id = Long.valueOf(context.getAuthentication().getName());
+        User use = userRepository.findById(id).orElseThrow(()->
+                new AppException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.toResponse(use);
     }
 }
