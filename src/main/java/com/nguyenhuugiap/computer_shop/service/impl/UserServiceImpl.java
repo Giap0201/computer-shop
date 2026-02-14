@@ -16,6 +16,9 @@ import com.nguyenhuugiap.computer_shop.service.interfaces.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -41,7 +45,7 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_EXISTS);
         User user = userMapper.toEntity(userCreationRequest);
         user.setPasswordHash(passwordEncoder.encode(userCreationRequest.getPassword()));
-        Role roleUser = roleRepository.findByName(RoleType.USER.name()).orElseThrow(()->
+        Role roleUser = roleRepository.findByName(RoleType.USER.name()).orElseThrow(() ->
                 new AppException(ErrorCode.ROLE_NOT_FOUND));
         user.getRoles().add(roleUser);
         userRepository.save(user);
@@ -61,6 +65,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Override
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
@@ -77,7 +82,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @PostAuthorize("returnObject.id.toString() == authentication.name")
     public UserResponse getUserById(Long id) {
+        log.info("Get User by id: {}", id);
         User user = userRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toResponse(user);
@@ -104,7 +111,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         Long id = Long.valueOf(context.getAuthentication().getName());
-        User use = userRepository.findById(id).orElseThrow(()->
+        User use = userRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toResponse(use);
     }
