@@ -3,6 +3,8 @@ package com.nguyenhuugiap.computer_shop.exception;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,5 +63,18 @@ public class GlobalExceptionHandler {
                 .message(errorCode.getMessage())
                 .build();
         return ResponseEntity.status(errorCode.getHttpStatusCode()).body(apiResponse);
+    }
+
+    @ExceptionHandler(value = {
+            AccessDeniedException.class,
+            AuthorizationDeniedException.class
+    })
+    ResponseEntity<ApiResponse<?>> handingAccessDeniedException(AccessDeniedException exception) {
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .code(ErrorCode.UNAUTHORIZED.getCode())
+                .message(ErrorCode.UNAUTHORIZED.getMessage())
+                .build();
+        log.error(exception.getMessage(), exception);
+        return ResponseEntity.status(ErrorCode.UNAUTHORIZED.getHttpStatusCode()).body(apiResponse);
     }
 }
