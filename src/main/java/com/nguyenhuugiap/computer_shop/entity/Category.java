@@ -4,9 +4,13 @@ import com.nguyenhuugiap.computer_shop.enums.CategoryStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @Entity
 @Getter
@@ -14,12 +18,11 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Table(name = "categories")
+@EntityListeners(AuditingEntityListener.class)
+
 public class Category extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     @ToString.Exclude
@@ -34,23 +37,37 @@ public class Category extends BaseEntity {
     String name;
     @Column(nullable = false, unique = true)
     String slug;
-    @Enumerated(EnumType.STRING)
-    CategoryStatus status;
+    @Column(columnDefinition = "TEXT")
+    String description;
     @Builder.Default
-    @ToString.Exclude
-    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    Set<Product> products = new HashSet<>();
+    @Enumerated(EnumType.STRING)
+    CategoryStatus status = CategoryStatus.ACTIVE;
+//    @Builder.Default
+//    @ToString.Exclude
+//    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+//    Set<Product> products = new HashSet<>();
 
-    // Tu dong tao slug khi khong set
+    // tu dong tao slug
     @PrePersist
-    private void prePersist() {
-        // Tao slug tu  name, neu ma slug khong co -> tao moi
-        if (this.name != null && this.slug == null) {
-            this.slug = this.name.toLowerCase()
-                    .replace(" ", "-")
-                    .replace("đ", "d")
-                    .replace("Đ", "d")
-                    .replaceAll("[^a-z0-9-]", "");
+    @PreUpdate
+    private void generateSlug() {
+        if (this.name != null && !this.name.isEmpty()) {
+            slug = toSlug(name);
         }
     }
+
+    private String toSlug(String input) {
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+        String str = input.toLowerCase();
+        str = str.replaceAll("đ", "d");
+        String normalizer = Normalizer.normalize(str, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        str = pattern.matcher(normalizer).replaceAll("");
+        str = str.replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-");
+        return str;
+    }
+
 }

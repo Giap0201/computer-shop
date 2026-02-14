@@ -1,5 +1,6 @@
 package com.nguyenhuugiap.computer_shop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nguyenhuugiap.computer_shop.enums.Gender;
 import com.nguyenhuugiap.computer_shop.enums.UserStatus;
 import jakarta.persistence.*;
@@ -21,9 +22,6 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EntityListeners(AuditingEntityListener.class)
 public class User extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
     @Column(nullable = false, unique = true)
     String email;
     @Column(nullable = false, unique = true, length = 20)
@@ -37,21 +35,18 @@ public class User extends BaseEntity {
     Gender gender;
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
-    UserStatus status;
-    @Column(name = "preferred_size", length = 50)
-    String preferredSize;
+    @Builder.Default
+    UserStatus status = UserStatus.ACTIVE;
+
     @Column(name = "deleted_at")
     LocalDateTime deletedAt;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @JsonIgnore
     @Builder.Default
-    Set<UserRole> userRoles = new HashSet<>();
-    public void addRole(Role role) {
-        UserRole userRole = new UserRole();
-        userRole.setUser(this);
-        userRole.setRole(role);
-        this.userRoles.add(userRole);
-    }
-
-
+    Set<Role> roles = new HashSet<>();
 }
