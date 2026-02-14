@@ -1,5 +1,6 @@
 package com.nguyenhuugiap.computer_shop.security;
 
+import com.nguyenhuugiap.computer_shop.configuration.CustomAccessDeniedHandler;
 import com.nguyenhuugiap.computer_shop.configuration.JwtAuthenticationEntryPoint;
 import com.nguyenhuugiap.computer_shop.configuration.JwtAuthenticationFilter;
 import lombok.AccessLevel;
@@ -29,6 +30,9 @@ public class SecurityConfig {
     String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/login", "/auth/token", "/auth/introspect"};
     String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**"};
     JwtAuthenticationFilter jwtAuthenticationFilter;
+    CustomAccessDeniedHandler customAccessDeniedHandler;
+    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(auth ->
@@ -40,8 +44,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        httpSecurity.exceptionHandling(exceptionHandler ->
-                exceptionHandler.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+        httpSecurity.exceptionHandling(exceptionHandler -> exceptionHandler
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler));
         return httpSecurity.build();
     }
 
