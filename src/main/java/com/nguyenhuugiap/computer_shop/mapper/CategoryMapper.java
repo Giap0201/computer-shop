@@ -13,7 +13,7 @@ public interface CategoryMapper {
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "slug", ignore = true)
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "products", ignore = true)
+//    @Mapping(target = "products", ignore = true)
     Category toEntity(CategoryCreationRequest categoryRequest);
     @Mapping(source = "parent.id", target = "parentId")
     @Mapping(source = "parent.name", target = "parentName")

@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
-import com.nguyenhuugiap.computer_shop.dto.request.BrandRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.BrandCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.BrandUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.BrandResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.BrandService;
@@ -22,7 +23,7 @@ public class BrandController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<BrandResponse> createBrand(@RequestBody @Valid BrandRequest request) {
+    public ApiResponse<BrandResponse> createBrand(@RequestBody @Valid BrandCreationRequest request) {
         return ApiResponse.<BrandResponse>builder()
                 .result(brandService.createBrand(request))
                 .build();
@@ -41,7 +42,7 @@ public class BrandController {
     }
 
     @PatchMapping("/{id}")
-    public ApiResponse<BrandResponse> updateBrand(@PathVariable Long id, @RequestBody @Valid BrandRequest request) {
+    public ApiResponse<BrandResponse> updateBrand(@PathVariable Long id, @RequestBody @Valid BrandUpdateRequest request) {
         return ApiResponse.<BrandResponse>builder()
                 .result(brandService.updateBrand(id, request))
                 .build();

@@ -2,7 +2,6 @@ package com.nguyenhuugiap.computer_shop;
 
 import com.nguyenhuugiap.computer_shop.entity.Role;
 import com.nguyenhuugiap.computer_shop.entity.User;
-import com.nguyenhuugiap.computer_shop.entity.UserRole;
 import com.nguyenhuugiap.computer_shop.enums.RoleType;
 import com.nguyenhuugiap.computer_shop.repository.RoleRepository;
 import com.nguyenhuugiap.computer_shop.repository.UserRepository;

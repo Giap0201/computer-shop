@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
-import com.nguyenhuugiap.computer_shop.dto.request.BrandRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.BrandCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.BrandUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.BrandResponse;
 import com.nguyenhuugiap.computer_shop.entity.Brand;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
@@ -25,7 +26,7 @@ public class BrandServiceImpl implements BrandService {
     BrandMapper brandMapper;
 
     @Override
-    public BrandResponse createBrand(BrandRequest request) {
+    public BrandResponse createBrand(BrandCreationRequest request) {
         if (brandRepository.existsByName(request.getName()))
             throw new AppException(ErrorCode.BRAND_EXISTS);
         return brandMapper.toResponse(brandRepository
@@ -39,9 +40,9 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public BrandResponse updateBrand(Long id, BrandRequest request) {
+    public BrandResponse updateBrand(Long id, BrandUpdateRequest request) {
         Brand brand = brandRepository.findById(id).orElseThrow(() ->
-                new AppException(ErrorCode.BRAND_NOT_EXISTS));
+                new AppException(ErrorCode.BRAND_NOT_FOUND));
         if(request.getName() != null && !request.getName().isEmpty()){
             if(brandRepository.existsByNameAndIdNot(request.getName(),id))
                 throw new AppException(ErrorCode.BRAND_NAME_EXISTS);
@@ -52,7 +53,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public void deleteBrand(Long id) {
-        if (!brandRepository.existsById(id)) throw new AppException(ErrorCode.BRAND_NOT_EXISTS);
+        if (!brandRepository.existsById(id)) throw new AppException(ErrorCode.BRAND_NOT_FOUND);
         brandRepository.deleteById(id);
     }
 
@@ -60,7 +61,7 @@ public class BrandServiceImpl implements BrandService {
     @Transactional(readOnly = true)
     public BrandResponse getBrandById(Long id) {
         Brand brand = brandRepository.findById(id).orElseThrow(() ->
-                new AppException(ErrorCode.BRAND_NOT_EXISTS));
+                new AppException(ErrorCode.BRAND_NOT_FOUND));
         return brandMapper.toResponse(brand);
     }
 }

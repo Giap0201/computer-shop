@@ -25,4 +25,6 @@ public class UserCreationRequest {
     @NotBlank(message = "USERNAME_INVALID")
     @Size(min = 2, max = 50, message = "USERNAME_INVALID")
     String fullName;
+    @Pattern(regexp = "^(MALE|FEMALE|OTHER)$", message = "GENDER_INVALID")
+    String gender;
 }
