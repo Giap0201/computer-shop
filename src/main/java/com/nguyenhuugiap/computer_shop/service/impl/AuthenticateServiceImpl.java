@@ -2,11 +2,14 @@ package com.nguyenhuugiap.computer_shop.service.impl;
 
 import com.nguyenhuugiap.computer_shop.dto.request.AuthenticateRequest;
 import com.nguyenhuugiap.computer_shop.dto.request.IntrospectRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.LogoutRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.AuthenticateResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.IntrospectResponse;
+import com.nguyenhuugiap.computer_shop.entity.InvalidatedToken;
 import com.nguyenhuugiap.computer_shop.entity.User;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
+import com.nguyenhuugiap.computer_shop.repository.InvalidatedTokenRepository;
 import com.nguyenhuugiap.computer_shop.repository.UserRepository;
 import com.nguyenhuugiap.computer_shop.service.interfaces.AuthenticateService;
 import com.nimbusds.jose.*;
@@ -39,6 +42,7 @@ import java.util.UUID;
 public class AuthenticateServiceImpl implements AuthenticateService {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
+    InvalidatedTokenRepository invalidatedTokenRepository;
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -53,7 +57,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()))
                 .claim("scope", buildScope(user))
-                .claim("jti", UUID.randomUUID().toString())
+                .jwtID(UUID.randomUUID().toString())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
@@ -99,16 +103,34 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         boolean verified = signedJWT.verify(verifier);
         Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
         if (!(verified && expirationDate.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+        if (invalidatedTokenRepository.existsById(jti)) {
+            log.warn("Invalid token");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
         return signedJWT.getJWTClaimsSet();
     }
 
-    private String buildScope(User user){
+
+    @Override
+    public void logout(LogoutRequest request) throws ParseException {
+        SignedJWT signedJWT = SignedJWT.parse(request.getToken());
+        String token = signedJWT.getJWTClaimsSet().getJWTID();
+        Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(token)
+                .expires(expirationDate)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+    private String buildScope(User user) {
         StringJoiner scopeJoiner = new StringJoiner(" ");
-        if(!CollectionUtils.isEmpty(user.getRoles())){
+        if (!CollectionUtils.isEmpty(user.getRoles())) {
             user.getRoles().forEach(role -> {
                 String roleName = role.getName();
-                if(!roleName.startsWith("ROLE_")){
-                    roleName = "ROLE_"+roleName;
+                if (!roleName.startsWith("ROLE_")) {
+                    roleName = "ROLE_" + roleName;
                 }
                 scopeJoiner.add(roleName);
             });
