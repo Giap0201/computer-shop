@@ -1,15 +1,14 @@
-package com.nguyenhuugiap.computer_shop.dto.response;
+package com.nguyenhuugiap.computer_shop.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticateResponse {
+public class LogoutRequest {
     String token;
     String refreshToken;
-    boolean authenticated;
 }
