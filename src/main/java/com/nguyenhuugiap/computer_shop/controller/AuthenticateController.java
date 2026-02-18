@@ -3,6 +3,7 @@ package com.nguyenhuugiap.computer_shop.controller;
 import com.nguyenhuugiap.computer_shop.dto.request.AuthenticateRequest;
 import com.nguyenhuugiap.computer_shop.dto.request.IntrospectRequest;
 import com.nguyenhuugiap.computer_shop.dto.request.LogoutRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.RefreshTokenRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.AuthenticateResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.IntrospectResponse;
@@ -23,7 +24,7 @@ import java.text.ParseException;
 public class AuthenticateController {
     AuthenticateService authenticateService;
 
-    @PostMapping("/token")
+    @PostMapping("/login")
     public ApiResponse<AuthenticateResponse> authenticate(@RequestBody AuthenticateRequest authenticateRequest) {
         return ApiResponse.<AuthenticateResponse>builder()
                 .result(authenticateService.authenticate(authenticateRequest))
@@ -42,6 +43,13 @@ public class AuthenticateController {
     public ApiResponse<Void> logout(@RequestBody LogoutRequest logoutRequest) throws ParseException {
         authenticateService.logout(logoutRequest);
         return ApiResponse.<Void>builder()
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthenticateResponse> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
+        return ApiResponse.<AuthenticateResponse>builder()
+                .result(authenticateService.refreshToken(refreshTokenRequest))
                 .build();
     }
 }

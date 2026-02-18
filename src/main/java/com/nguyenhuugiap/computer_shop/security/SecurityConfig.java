@@ -27,7 +27,7 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/login", "/auth/token", "/auth/introspect", "/auth/logout"};
+    String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/**"};
     String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**"};
     JwtAuthenticationFilter jwtAuthenticationFilter;
     CustomAccessDeniedHandler customAccessDeniedHandler;

@@ -3,6 +3,7 @@ package com.nguyenhuugiap.computer_shop.service.impl;
 import com.nguyenhuugiap.computer_shop.dto.request.AuthenticateRequest;
 import com.nguyenhuugiap.computer_shop.dto.request.IntrospectRequest;
 import com.nguyenhuugiap.computer_shop.dto.request.LogoutRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.RefreshTokenRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.AuthenticateResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.IntrospectResponse;
 import com.nguyenhuugiap.computer_shop.entity.InvalidatedToken;
@@ -47,15 +48,23 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    private long VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.refreshable-duration}")
+    private long REFRESHABLE_DURATION;
+
 
     @Override
-    public String generateToken(User user) {
+    public String generateToken(User user, long expiryTime) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getId().toString())
                 .issuer("nguyenhuugiap.com")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(expiryTime, ChronoUnit.SECONDS).toEpochMilli()))
                 .claim("scope", buildScope(user))
                 .jwtID(UUID.randomUUID().toString())
                 .build();
@@ -77,9 +86,12 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 new AppException(ErrorCode.USER_NOT_FOUND));
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash()))
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
-        String token = generateToken(user);
+        String accessToken = generateToken(user, VALID_DURATION);
+        String refreshToken = generateToken(user, REFRESHABLE_DURATION);
         return AuthenticateResponse.builder()
-                .token(token)
+                .token(accessToken)
+                .refreshToken(refreshToken)
+                .authenticated(true)
                 .build();
     }
 
@@ -122,6 +134,28 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .expires(expirationDate)
                 .build();
         invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+    @Override
+    public AuthenticateResponse refreshToken(RefreshTokenRequest request) throws ParseException, JOSEException {
+        JWTClaimsSet jwtClaimsSet = verifyToken(request.getToken());
+        Date expirationDate = jwtClaimsSet.getExpirationTime();
+        String jti = jwtClaimsSet.getJWTID();
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .expires(expirationDate)
+                .id(jti)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+        Long id = Long.parseLong(jwtClaimsSet.getSubject());
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new AppException(ErrorCode.USER_NOT_FOUND));
+        String accessToken = generateToken(user, VALID_DURATION);
+        String refreshToken = generateToken(user, REFRESHABLE_DURATION);
+        return AuthenticateResponse.builder()
+                .token(accessToken)
+                .refreshToken(refreshToken)
+                .authenticated(true)
+                .build();
     }
 
     private String buildScope(User user) {
