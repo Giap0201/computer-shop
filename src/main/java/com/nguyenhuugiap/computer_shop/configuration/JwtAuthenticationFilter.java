@@ -9,7 +9,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,6 +30,9 @@ import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     AuthenticateService authenticateService;
+    @NonFinal
+    @Value("${jwt.signer-key}")
+    private String SIGNER_KEY;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -38,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         String token = authHeader.substring(7);
         try {
-            JWTClaimsSet jwtClaimsSet = authenticateService.verifyToken(token);
+            JWTClaimsSet jwtClaimsSet = authenticateService.verifyToken(token, SIGNER_KEY);
             String userId = jwtClaimsSet.getSubject();
             String scope = jwtClaimsSet.getClaimAsString("scope");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
@@ -52,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken(userId, null, grantedAuthorities);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         } catch (Exception e) {
-            log.error("JWT Authentication Failed: {}", e.getMessage());
+            log.warn("JWT Authentication Failed: {}", e.getMessage());
         }
         filterChain.doFilter(request, response);
     }

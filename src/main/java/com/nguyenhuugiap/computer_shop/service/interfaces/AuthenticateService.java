@@ -13,13 +13,13 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import java.text.ParseException;
 
 public interface AuthenticateService {
-    String generateToken(User user, long expiryTime);
+    String generateToken(User user, long expiryTime, String key);
 
     AuthenticateResponse authenticate(AuthenticateRequest request);
 
     IntrospectResponse introspect(IntrospectRequest request) throws ParseException, JOSEException;
 
-    JWTClaimsSet verifyToken(String token) throws JOSEException, ParseException;
+    JWTClaimsSet verifyToken(String token, String key) throws JOSEException, ParseException;
 
     void logout(LogoutRequest request) throws ParseException;
     AuthenticateResponse refreshToken(RefreshTokenRequest request) throws ParseException, JOSEException;
