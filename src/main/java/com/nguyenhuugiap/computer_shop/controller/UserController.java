@@ -1,7 +1,7 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
-import com.nguyenhuugiap.computer_shop.dto.request.UserCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.UserUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.user.UserCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.user.UserUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.UserResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.UserService;
@@ -10,7 +10,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

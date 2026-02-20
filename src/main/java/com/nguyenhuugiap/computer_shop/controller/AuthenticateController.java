@@ -1,9 +1,9 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
-import com.nguyenhuugiap.computer_shop.dto.request.AuthenticateRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.IntrospectRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.LogoutRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.RefreshTokenRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.authenticate.AuthenticateRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.authenticate.IntrospectRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.authenticate.LogoutRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.authenticate.RefreshTokenRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.AuthenticateResponse;
 import com.nguyenhuugiap.computer_shop.dto.response.IntrospectResponse;

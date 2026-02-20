@@ -1,7 +1,7 @@
 package com.nguyenhuugiap.computer_shop.mapper;
 
-import com.nguyenhuugiap.computer_shop.dto.request.CategoryCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.CategoryUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.category.CategoryCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.request.category.CategoryUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.entity.Category;
 import org.mapstruct.*;

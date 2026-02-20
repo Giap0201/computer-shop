@@ -40,12 +40,15 @@ public enum ErrorCode {
     // --- ROLE (35XX) ---
     ROLE_NOT_FOUND(3501, "Vai trò (Role) không tồn tại", HttpStatus.NOT_FOUND),
 
-    // --- BRAND (4XXX) ---
+    // --- BRAND (40XX) ---
     BRAND_EXISTS(4001, "Thương hiệu này đã tồn tại", HttpStatus.BAD_REQUEST),
     BRAND_NAME_REQUIRED(4002, "Tên thương hiệu bắt buộc nhập", HttpStatus.BAD_REQUEST),
     BRAND_NAME_INVALID(4003, "Tên thương hiệu không hợp lệ", HttpStatus.BAD_REQUEST),
     BRAND_NOT_FOUND(4004, "Thương hiệu không tồn tại", HttpStatus.NOT_FOUND),
     BRAND_NAME_EXISTS(4005, "Tên thương hiệu đã được sử dụng", HttpStatus.BAD_REQUEST),
+
+    // --- PRODUCT (41XX)
+    PRODUCT_EXISTS(4100, "Sản phầm này đã tồn tại", HttpStatus.BAD_REQUEST),
 
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

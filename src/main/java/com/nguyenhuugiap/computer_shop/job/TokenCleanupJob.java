@@ -23,5 +23,4 @@ public class TokenCleanupJob {
         log.info("Cleaning up expired tokens start");
         invalidatedTokenRepository.deleteAllExpiredSince(new Date());
         log.info("Cleaning up expired tokens done");
-    }
-}
+    }}

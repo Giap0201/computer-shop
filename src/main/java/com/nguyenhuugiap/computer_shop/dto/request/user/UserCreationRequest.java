@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.request;
+package com.nguyenhuugiap.computer_shop.dto.request.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

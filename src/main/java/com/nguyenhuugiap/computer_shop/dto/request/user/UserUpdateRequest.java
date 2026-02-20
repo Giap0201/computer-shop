@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.request;
+package com.nguyenhuugiap.computer_shop.dto.request.user;
 
 import com.nguyenhuugiap.computer_shop.enums.Gender;
 import com.nguyenhuugiap.computer_shop.enums.UserStatus;

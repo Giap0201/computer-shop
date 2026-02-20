@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.request;
+package com.nguyenhuugiap.computer_shop.dto.request.brand;
 
 import jakarta.validation.constraints.Size;
 import lombok.*;
