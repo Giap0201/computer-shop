@@ -1,12 +1,12 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
-import com.nguyenhuugiap.computer_shop.dto.request.authenticate.AuthenticateRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.authenticate.IntrospectRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.authenticate.LogoutRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.authenticate.RefreshTokenRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
-import com.nguyenhuugiap.computer_shop.dto.response.AuthenticateResponse;
-import com.nguyenhuugiap.computer_shop.dto.response.IntrospectResponse;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.AuthenticateRequest;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.IntrospectRequest;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.LogoutRequest;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.RefreshTokenRequest;
+import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.AuthenticateResponse;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.IntrospectResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.AuthenticateService;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;

@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.request.product;
+package com.nguyenhuugiap.computer_shop.dto.product;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

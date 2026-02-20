@@ -1,25 +1,21 @@
-package com.nguyenhuugiap.computer_shop.dto.response;
+package com.nguyenhuugiap.computer_shop.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nguyenhuugiap.computer_shop.enums.Gender;
 import com.nguyenhuugiap.computer_shop.enums.UserStatus;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserResponse {
-    Long id;
+public class UserUpdateRequest {
+    @Size(min = 2, max = 50, message = "USERNAME_INVALID")
     String fullName;
-    String phone;
-    String email;
+    @Size(min = 8, message = "PASSWORD_INVALID")
+    String password;
     Gender gender;
     UserStatus status;
-    LocalDateTime createdAt;
 }

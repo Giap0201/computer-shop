@@ -1,5 +1,7 @@
-package com.nguyenhuugiap.computer_shop.dto.response;
+package com.nguyenhuugiap.computer_shop.dto.product;
 
+import com.nguyenhuugiap.computer_shop.dto.brand.BrandResponse;
+import com.nguyenhuugiap.computer_shop.dto.category.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.enums.ProductStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

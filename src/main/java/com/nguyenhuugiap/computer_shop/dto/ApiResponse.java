@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.response;
+package com.nguyenhuugiap.computer_shop.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

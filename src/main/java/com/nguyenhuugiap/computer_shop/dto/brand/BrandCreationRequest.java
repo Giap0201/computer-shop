@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.request.role;
+package com.nguyenhuugiap.computer_shop.dto.brand;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -10,10 +10,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-
-public class RoleRequest {
-    @NotBlank(message = "ROLE_NAME_REQUIRED")
-    @Size(max = 50, message = "ROLE_TOO_LONG")
+public class BrandCreationRequest {
+    @NotBlank(message = "BRAND_NAME_REQUIRED")
+    @Size(max = 100, message = "BRAND_NAME_INVALID")
     String name;
-    String description;
+    String logo;
 }

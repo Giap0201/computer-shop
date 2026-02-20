@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.response.role;
+package com.nguyenhuugiap.computer_shop.dto.role;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

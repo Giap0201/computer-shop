@@ -1,8 +1,8 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
-import com.nguyenhuugiap.computer_shop.dto.request.brand.BrandCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.brand.BrandUpdateRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.BrandResponse;
+import com.nguyenhuugiap.computer_shop.dto.brand.BrandCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.brand.BrandUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.brand.BrandResponse;
 import com.nguyenhuugiap.computer_shop.entity.Brand;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;

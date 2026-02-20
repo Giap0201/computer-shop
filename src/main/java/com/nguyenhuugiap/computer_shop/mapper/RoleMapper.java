@@ -1,7 +1,7 @@
 package com.nguyenhuugiap.computer_shop.mapper;
 
-import com.nguyenhuugiap.computer_shop.dto.request.role.RoleRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.role.RoleResponse;
+import com.nguyenhuugiap.computer_shop.dto.role.RoleRequest;
+import com.nguyenhuugiap.computer_shop.dto.role.RoleResponse;
 import com.nguyenhuugiap.computer_shop.entity.Role;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

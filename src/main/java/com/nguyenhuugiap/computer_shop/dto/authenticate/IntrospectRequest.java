@@ -1,13 +1,13 @@
-package com.nguyenhuugiap.computer_shop.dto.request.authenticate;
+package com.nguyenhuugiap.computer_shop.dto.authenticate;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RefreshTokenRequest {
+public class IntrospectRequest {
     String token;
 }

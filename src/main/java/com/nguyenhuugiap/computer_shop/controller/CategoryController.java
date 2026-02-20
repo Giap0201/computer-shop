@@ -1,9 +1,9 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
-import com.nguyenhuugiap.computer_shop.dto.request.category.CategoryCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.category.CategoryUpdateRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
-import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
+import com.nguyenhuugiap.computer_shop.dto.category.CategoryCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.category.CategoryUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.category.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.CategoryService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;

@@ -1,9 +1,9 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
 
-import com.nguyenhuugiap.computer_shop.dto.request.user.UserCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.user.UserUpdateRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.UserResponse;
+import com.nguyenhuugiap.computer_shop.dto.user.UserCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.user.UserUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.user.UserResponse;
 import com.nguyenhuugiap.computer_shop.entity.Role;
 import com.nguyenhuugiap.computer_shop.entity.User;
 import com.nguyenhuugiap.computer_shop.enums.RoleType;

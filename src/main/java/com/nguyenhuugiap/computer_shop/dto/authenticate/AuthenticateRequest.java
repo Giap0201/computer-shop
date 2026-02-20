@@ -1,13 +1,14 @@
-package com.nguyenhuugiap.computer_shop.dto.response;
+package com.nguyenhuugiap.computer_shop.dto.authenticate;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class IntrospectResponse {
-    boolean valid;
+public class AuthenticateRequest {
+    String username;
+    String password;
 }

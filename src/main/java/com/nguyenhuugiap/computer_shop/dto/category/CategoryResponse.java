@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.response;
+package com.nguyenhuugiap.computer_shop.dto.category;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nguyenhuugiap.computer_shop.enums.CategoryStatus;

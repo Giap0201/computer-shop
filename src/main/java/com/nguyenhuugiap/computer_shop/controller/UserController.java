@@ -1,9 +1,9 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
-import com.nguyenhuugiap.computer_shop.dto.request.user.UserCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.user.UserUpdateRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
-import com.nguyenhuugiap.computer_shop.dto.response.UserResponse;
+import com.nguyenhuugiap.computer_shop.dto.user.UserCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.user.UserUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.user.UserResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;

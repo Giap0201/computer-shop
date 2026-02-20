@@ -1,7 +1,7 @@
 package com.nguyenhuugiap.computer_shop.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

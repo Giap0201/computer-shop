@@ -1,4 +1,4 @@
-package com.nguyenhuugiap.computer_shop.dto.request.authenticate;
+package com.nguyenhuugiap.computer_shop.dto.authenticate;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +8,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class IntrospectRequest {
+public class AuthenticateResponse {
     String token;
+    String refreshToken;
+    boolean authenticated;
 }
