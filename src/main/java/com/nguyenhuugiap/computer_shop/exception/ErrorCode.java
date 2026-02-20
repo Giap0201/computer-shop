@@ -49,6 +49,18 @@ public enum ErrorCode {
 
     // --- PRODUCT (41XX)
     PRODUCT_EXISTS(4100, "Sản phầm này đã tồn tại", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_REQUIRED(4101, "Tên sản phẩm bắt buộc nhập", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_INVALID(4102, "Tên sản phẩm không đúng định dạng", HttpStatus.BAD_REQUEST),
+    DESCRIPTION_INVALID(4103, "Mô tả không đúng định dạng", HttpStatus.BAD_REQUEST),
+    CATEGORY_REQUIRED(4104, "Danh mục không hợp lệ", HttpStatus.BAD_REQUEST),
+    BRAND_REQUIRED(4105, "Thương hiệu không hợp lệ", HttpStatus.BAD_REQUEST),
+
+    // --- PRODUCT_VARIANTS(42XX)
+    SKU_CODE_INVALID(4200, "Mã sku không hợp lệ", HttpStatus.BAD_REQUEST),
+    PRICE_REQUIRED(4201, "Giá không được bỏ trống", HttpStatus.BAD_REQUEST),
+    PRICE_INVALID(4202, "Giá tiền không hợp lệ", HttpStatus.BAD_REQUEST),
+    STOCK_REQUIRED(4203, "Tồn kho không được bỏ trống", HttpStatus.BAD_REQUEST),
+    STOCK_INVALID(4204, "Tồn kho không hợp lệ", HttpStatus.BAD_REQUEST),
 
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

@@ -9,6 +9,8 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -46,6 +48,15 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "brand_id")
     @ManyToOne(fetch = FetchType.LAZY)
     Brand brand;
+
+    @Builder.Default
+    @OneToMany(
+            mappedBy = "product",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, // luu cha tu luu con va xoa cha tu xoa con
+            orphanRemoval = true // Xoa variant khoi list thi xoa luon trong db
+    )
+    Set<ProductVariant> productVariants = new HashSet<>();
 
     @PrePersist
     @PreUpdate
