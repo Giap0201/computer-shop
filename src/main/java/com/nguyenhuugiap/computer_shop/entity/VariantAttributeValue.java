@@ -12,7 +12,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "variant_attribute_values")
+@Table(name = "variant_attribute_values",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"variant_id", "attribute_id"}))
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EntityListeners(AuditingEntityListener.class)
 
