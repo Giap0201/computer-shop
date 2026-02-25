@@ -29,6 +29,7 @@ public class SecurityConfig {
 
     String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/**"};
     String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**"};
+    String[] PRODUCTS_PUBLIC_ENDPOINTS = {"/products/**"};
     JwtAuthenticationFilter jwtAuthenticationFilter;
     CustomAccessDeniedHandler customAccessDeniedHandler;
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -38,6 +39,7 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(auth ->
                         auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.GET, PRODUCTS_PUBLIC_ENDPOINTS).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/files/**").hasRole("ADMIN")
 //                                .requestMatchers(HttpMethod.GET, CATEGORIES_PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().authenticated())

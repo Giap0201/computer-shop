@@ -20,6 +20,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Log4j2
 @Service
@@ -46,5 +48,26 @@ public class ProductServiceImpl implements ProductService {
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductResponse(savedProduct);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<ProductResponse> getAllProducts() {
+        return productRepository.findAll().stream()
+                .map(productMapper::toProductResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ProductResponse getProductById(long id) {
+        Product product = productRepository.findById(id).orElseThrow(() ->
+                new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        return productMapper.toProductResponse(product);
+    }
+
+    @Override
+    public void deleteProductById(long id) {
+        if (!productRepository.existsById(id)) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        productRepository.deleteById(id);
     }
 }

@@ -54,6 +54,7 @@ public enum ErrorCode {
     DESCRIPTION_INVALID(4103, "Mô tả không đúng định dạng", HttpStatus.BAD_REQUEST),
     CATEGORY_REQUIRED(4104, "Danh mục không hợp lệ", HttpStatus.BAD_REQUEST),
     BRAND_REQUIRED(4105, "Thương hiệu không hợp lệ", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_FOUND(4106, "Không tồn tại sản phẩm", HttpStatus.NOT_FOUND),
 
     // --- PRODUCT_VARIANTS(42XX)
     SKU_CODE_INVALID(4200, "Mã sku không hợp lệ", HttpStatus.BAD_REQUEST),

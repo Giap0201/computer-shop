@@ -11,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/products")
@@ -24,5 +26,26 @@ public class ProductController {
         return ApiResponse.<ProductResponse>builder()
                 .result(productService.createProduct(productCreationRequest))
                 .build();
+    }
+
+    @GetMapping
+    public ApiResponse<List<ProductResponse>> getAllProducts() {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .result(productService.getAllProducts())
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<ProductResponse> getProductById(@PathVariable long id) {
+        return ApiResponse.<ProductResponse>builder()
+                .result(productService.getProductById(id))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ApiResponse<Void> deleteProductById(@PathVariable long id) {
+        productService.deleteProductById(id);
+        return ApiResponse.<Void>builder().build();
     }
 }
