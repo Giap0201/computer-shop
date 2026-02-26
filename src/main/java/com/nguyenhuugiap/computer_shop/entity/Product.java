@@ -56,7 +56,38 @@ public class Product extends BaseEntity {
             cascade = CascadeType.ALL, // luu cha tu luu con va xoa cha tu xoa con
             orphanRemoval = true // Xoa variant khoi list thi xoa luon trong db
     )
+    @ToString.Exclude
     Set<ProductVariant> productVariants = new HashSet<>();
+
+    @OneToMany(
+            mappedBy = "product",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    @ToString.Exclude
+    Set<ProductImage> productImages = new HashSet<>();
+
+    public void addImage(ProductImage image) {
+        image.setProduct(this);
+        productImages.add(image);
+    }
+
+    public void removeImage(ProductImage image) {
+        productImages.remove(image);
+        image.setProduct(null);
+    }
+
+    public void addVariant(ProductVariant variant) {
+        variant.setProduct(this);
+        productVariants.add(variant);
+    }
+
+    public void removeVariant(ProductVariant variant) {
+        productVariants.remove(variant);
+        variant.setProduct(null);
+    }
 
     @PrePersist
     @PreUpdate

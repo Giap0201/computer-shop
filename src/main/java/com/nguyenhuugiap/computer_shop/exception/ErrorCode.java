@@ -56,12 +56,16 @@ public enum ErrorCode {
     BRAND_REQUIRED(4105, "Thương hiệu không hợp lệ", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND(4106, "Không tồn tại sản phẩm", HttpStatus.NOT_FOUND),
 
-    // --- PRODUCT_VARIANTS(42XX)
+    // --- PRODUCT_VARIANTS_ATTRIBUTES(42XX)
     SKU_CODE_INVALID(4200, "Mã sku không hợp lệ", HttpStatus.BAD_REQUEST),
     PRICE_REQUIRED(4201, "Giá không được bỏ trống", HttpStatus.BAD_REQUEST),
     PRICE_INVALID(4202, "Giá tiền không hợp lệ", HttpStatus.BAD_REQUEST),
     STOCK_REQUIRED(4203, "Tồn kho không được bỏ trống", HttpStatus.BAD_REQUEST),
     STOCK_INVALID(4204, "Tồn kho không hợp lệ", HttpStatus.BAD_REQUEST),
+    NAME_ATTRIBUTE_REQUIRED(4205, "Tên thuộc tính không được bỏ trống", HttpStatus.BAD_REQUEST),
+    VALUE_ATTRIBUTE_REQUIRED(4206, "Giá trị thuộc tính không được bỏ trống", HttpStatus.BAD_REQUEST),
+    VARIANT_ATTRIBUTE_VALUE_REQUIRED(4207, "Danh sách thuộc tính không đuược bỏ trống", HttpStatus.BAD_REQUEST),
+    ATTRIBUTE_ID_REQUIRED(4208, "Vui lòng thêm tên thuộc tính", HttpStatus.BAD_REQUEST),
 
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

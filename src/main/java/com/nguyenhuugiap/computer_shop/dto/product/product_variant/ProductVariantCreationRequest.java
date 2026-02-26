@@ -1,5 +1,7 @@
 package com.nguyenhuugiap.computer_shop.dto.product.product_variant;
 
+import com.nguyenhuugiap.computer_shop.dto.product.attribute.VariantAttributeValueRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +9,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -28,5 +31,8 @@ public class ProductVariantCreationRequest {
 
     String imageUrl;
 
+    @NotNull(message = "VARIANT_ATTRIBUTE_VALUE_REQUIRED")
+    @Valid
+    List<VariantAttributeValueRequest> attributes;
 
 }
