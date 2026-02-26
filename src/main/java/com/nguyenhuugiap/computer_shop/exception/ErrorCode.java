@@ -66,6 +66,9 @@ public enum ErrorCode {
     VALUE_ATTRIBUTE_REQUIRED(4206, "Giá trị thuộc tính không được bỏ trống", HttpStatus.BAD_REQUEST),
     VARIANT_ATTRIBUTE_VALUE_REQUIRED(4207, "Danh sách thuộc tính không đuược bỏ trống", HttpStatus.BAD_REQUEST),
     ATTRIBUTE_ID_REQUIRED(4208, "Vui lòng thêm tên thuộc tính", HttpStatus.BAD_REQUEST),
+    ATTRIBUTE_EXISTS(4209, "Thuộc tính đã tồn tại", HttpStatus.BAD_REQUEST),
+    ATTRIBUTE_NOT_FOUND(4210, "Thuộc tính không tồn tại", HttpStatus.NOT_FOUND),
+    ATTRIBUTE_IN_USE(4211, "Thuộc tính đang được sử dụng", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

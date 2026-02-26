@@ -29,7 +29,7 @@ public class SecurityConfig {
 
     String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/**"};
     String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**"};
-    String[] PRODUCTS_PUBLIC_ENDPOINTS = {"/products/**"};
+    String[] PRODUCTS_PUBLIC_ENDPOINTS = {"/products/**", "/attributes/**"};
     JwtAuthenticationFilter jwtAuthenticationFilter;
     CustomAccessDeniedHandler customAccessDeniedHandler;
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;

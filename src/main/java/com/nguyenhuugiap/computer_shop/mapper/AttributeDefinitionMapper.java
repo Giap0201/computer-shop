@@ -4,8 +4,7 @@ package com.nguyenhuugiap.computer_shop.mapper;
 import com.nguyenhuugiap.computer_shop.dto.product.attribute.AttributeDefinitionRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.attribute.AttributeDefinitionResponse;
 import com.nguyenhuugiap.computer_shop.entity.AttributeDefinition;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface AttributeDefinitionMapper {
@@ -14,4 +13,6 @@ public interface AttributeDefinitionMapper {
 
     AttributeDefinitionResponse toAttributeDefinitionResponse(AttributeDefinition attributeDefinition);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void toUpdateAttributeDefinition(@MappingTarget AttributeDefinition attributeDefinition, AttributeDefinitionRequest attributeDefinitionRequest);
 }
