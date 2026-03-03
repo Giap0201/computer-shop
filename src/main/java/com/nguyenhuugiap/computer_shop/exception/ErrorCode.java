@@ -70,6 +70,9 @@ public enum ErrorCode {
     ATTRIBUTE_NOT_FOUND(4210, "Thuộc tính không tồn tại", HttpStatus.NOT_FOUND),
     ATTRIBUTE_IN_USE(4211, "Thuộc tính đang được sử dụng", HttpStatus.INTERNAL_SERVER_ERROR),
     SKU_CODE_EXISTS(4212, "Mã sku code đã tồn tại", HttpStatus.INTERNAL_SERVER_ERROR),
+    PRODUCT_VARIANT_NOT_FOUND(4213, "Biến thể không tồn tại", HttpStatus.NOT_FOUND),
+    VERSION_MISMATCH(4214, "Dữ liệu đã bị thay đổi bởi người khác. Vui lòng tải lại.", HttpStatus.CONFLICT),
+    VERSION_REQUIRED(4215, "Version không được bỏ qua", HttpStatus.BAD_REQUEST),
 
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

@@ -3,6 +3,8 @@ package com.nguyenhuugiap.computer_shop.service.impl;
 import com.nguyenhuugiap.computer_shop.dto.product.attribute.VariantAttributeValueRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantResponse;
+import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantUpdateStatusRequest;
 import com.nguyenhuugiap.computer_shop.entity.AttributeDefinition;
 import com.nguyenhuugiap.computer_shop.entity.Product;
 import com.nguyenhuugiap.computer_shop.entity.ProductVariant;
@@ -74,5 +76,43 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
         ProductVariant savedProductVariant = productVariantRepository.save(productVariant);
         return productVariantMapper.toProductVariantResponse(savedProductVariant);
+    }
+
+    @Override
+    public ProductVariantResponse getProductVariant(long productId, long variantId) {
+        ProductVariant productVariant = productVariantRepository.findByIdAndProductId(variantId, productId).orElseThrow(() ->
+                new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        return productVariantMapper.toProductVariantResponse(productVariant);
+    }
+
+    @Override
+    public List<ProductVariantResponse> getAllProductVariantsByProductId(long productId) {
+        return productVariantRepository.findAllByProductId(productId).stream()
+                .map(productVariantMapper::toProductVariantResponse).toList();
+    }
+
+    @Override
+    public ProductVariantResponse updateProductVariantByStatus(long id, ProductVariantUpdateStatusRequest status) {
+        ProductVariant productVariant = productVariantRepository.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        productVariant.setStatus(status.getStatus());
+        return productVariantMapper.toProductVariantResponse(productVariantRepository.save(productVariant));
+    }
+
+    @Override
+    public ProductVariantResponse updateProductVariant(long id, ProductVariantUpdateRequest request) {
+        ProductVariant productVariant = productVariantRepository.findById(id).orElseThrow(() ->
+                new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        if (!productVariant.getVersion().equals(request.getVersion())) {
+            throw new AppException(ErrorCode.VERSION_MISMATCH);
+        }
+        if (request.getSkuCode() != null
+                && !request.getSkuCode().equals(productVariant.getSkuCode())
+                && productVariantRepository.existsBySkuCode(request.getSkuCode())) {
+            throw new AppException(ErrorCode.SKU_CODE_EXISTS);
+        }
+        productVariantMapper.updateProductVariant(productVariant, request);
+        ProductVariant updatedVariant = productVariantRepository.save(productVariant);
+        return productVariantMapper.toProductVariantResponse(updatedVariant);
     }
 }

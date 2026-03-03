@@ -2,9 +2,9 @@ package com.nguyenhuugiap.computer_shop.mapper;
 
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantResponse;
+import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantUpdateRequest;
 import com.nguyenhuugiap.computer_shop.entity.ProductVariant;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", uses = {VariantAttributeValueMapper.class})
 public interface ProductVariantMapper {
@@ -20,4 +20,7 @@ public interface ProductVariantMapper {
     @Mapping(source = "product.id", target = "productId")
     @Mapping(source = "attributeValues", target = "attributes")
     ProductVariantResponse toProductVariantResponse(ProductVariant productVariant);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateProductVariant(@MappingTarget ProductVariant productVariant, ProductVariantUpdateRequest request);
 }
