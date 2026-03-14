@@ -70,6 +70,7 @@ public class Product extends BaseEntity {
     Set<ProductImage> productImages = new HashSet<>();
 
     public void addImage(ProductImage image) {
+        if(productImages == null) productImages = new HashSet<>();
         image.setProduct(this);
         productImages.add(image);
     }
@@ -80,6 +81,7 @@ public class Product extends BaseEntity {
     }
 
     public void addVariant(ProductVariant variant) {
+        if(productVariants == null) productVariants = new HashSet<>();
         variant.setProduct(this);
         productVariants.add(variant);
     }
