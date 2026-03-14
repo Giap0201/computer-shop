@@ -1,5 +1,6 @@
 package com.nguyenhuugiap.computer_shop.mapper;
 
+import com.nguyenhuugiap.computer_shop.dto.product.image.ImageSlimResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.image.ProductImageCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.image.ProductImageResponse;
 import com.nguyenhuugiap.computer_shop.entity.ProductImage;
@@ -20,5 +21,9 @@ public interface ProductImageMapper {
     ProductImageResponse toProductImageResponse(ProductImage productImage);
 
     List<ProductImageResponse> toProductImageResponseList(List<ProductImage> productImages);
+
+    ImageSlimResponse toImageSlimResponse(ProductImage productImage);
+
+    List<ImageSlimResponse> toImageSlimResponseList(List<ProductImage> productImages);
 
 }

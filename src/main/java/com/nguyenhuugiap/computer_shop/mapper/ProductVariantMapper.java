@@ -3,8 +3,11 @@ package com.nguyenhuugiap.computer_shop.mapper;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.product.product_variant.VariantSlimResponse;
 import com.nguyenhuugiap.computer_shop.entity.ProductVariant;
 import org.mapstruct.*;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {VariantAttributeValueMapper.class})
 public interface ProductVariantMapper {
@@ -23,4 +26,11 @@ public interface ProductVariantMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateProductVariant(@MappingTarget ProductVariant productVariant, ProductVariantUpdateRequest request);
+
+    // 2. Dùng cho API lấy Product Detail
+    @Mapping(source = "attributeValues", target = "attributes")
+    VariantSlimResponse toVariantSlimResponse(ProductVariant productVariant);
+
+    List<VariantSlimResponse> toVariantSlimResponseList(List<ProductVariant> variants);
+
 }

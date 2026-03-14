@@ -87,7 +87,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
     @Override
     public List<ProductVariantResponse> getAllProductVariantsByProductId(long productId) {
-        return productVariantRepository.findAllByProductId(productId).stream()
+        return productVariantRepository.findAllByProduct_Id(productId).stream()
                 .map(productVariantMapper::toProductVariantResponse).toList();
     }
 

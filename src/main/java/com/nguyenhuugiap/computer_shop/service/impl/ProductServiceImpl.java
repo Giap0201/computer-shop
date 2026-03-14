@@ -1,16 +1,17 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
+import com.nguyenhuugiap.computer_shop.dto.product.AdminProductDetailResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.ProductCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.ProductResponse;
-import com.nguyenhuugiap.computer_shop.entity.Brand;
-import com.nguyenhuugiap.computer_shop.entity.Category;
-import com.nguyenhuugiap.computer_shop.entity.Product;
+import com.nguyenhuugiap.computer_shop.dto.product.image.ImageSlimResponse;
+import com.nguyenhuugiap.computer_shop.dto.product.product_variant.VariantSlimResponse;
+import com.nguyenhuugiap.computer_shop.entity.*;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
+import com.nguyenhuugiap.computer_shop.mapper.ProductImageMapper;
 import com.nguyenhuugiap.computer_shop.mapper.ProductMapper;
-import com.nguyenhuugiap.computer_shop.repository.BrandRepository;
-import com.nguyenhuugiap.computer_shop.repository.CategoryRepository;
-import com.nguyenhuugiap.computer_shop.repository.ProductRepository;
+import com.nguyenhuugiap.computer_shop.mapper.ProductVariantMapper;
+import com.nguyenhuugiap.computer_shop.repository.*;
 import com.nguyenhuugiap.computer_shop.service.interfaces.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,10 @@ public class ProductServiceImpl implements ProductService {
     ProductMapper productMapper;
     CategoryRepository categoryRepository;
     BrandRepository brandRepository;
+    ProductVariantRepository productVariantRepository;
+    ProductImageRepository productImageRepository;
+    ProductVariantMapper productVariantMapper;
+    ProductImageMapper productImageMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     @Override
@@ -69,5 +74,24 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProductById(long id) {
         if (!productRepository.existsById(id)) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         productRepository.deleteById(id);
+    }
+
+    @Override
+    public AdminProductDetailResponse getAdminProductDetail(long id) {
+        Product product = productRepository.findById(id).orElseThrow(() ->
+                new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        ProductResponse productResponse = productMapper.toProductResponse(product);
+
+        List<ProductImage> productImages = productImageRepository.findAllByProduct_Id(product.getId());
+        List<ImageSlimResponse> productImageResponses = productImageMapper.toImageSlimResponseList(productImages);
+
+        List<ProductVariant> productVariants = productVariantRepository.findAllByProduct_Id(product.getId());
+        List<VariantSlimResponse> variantSlimResponses = productVariantMapper.toVariantSlimResponseList(productVariants);
+
+        return AdminProductDetailResponse.builder()
+                .product(productResponse)
+                .productImageResponse(productImageResponses)
+                .productVariantResponse(variantSlimResponses)
+                .build();
     }
 }

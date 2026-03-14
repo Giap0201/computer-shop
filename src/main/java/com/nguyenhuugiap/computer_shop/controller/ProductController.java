@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
 import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.product.AdminProductDetailResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.ProductCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.ProductResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.ProductService;
@@ -47,5 +48,12 @@ public class ProductController {
     public ApiResponse<Void> deleteProductById(@PathVariable long id) {
         productService.deleteProductById(id);
         return ApiResponse.<Void>builder().build();
+    }
+
+    @GetMapping("/detail/{productId}")
+    ApiResponse<AdminProductDetailResponse> adminGetProductDetail(@PathVariable long productId) {
+        return ApiResponse.<AdminProductDetailResponse>builder()
+                .result(productService.getAdminProductDetail(productId))
+                .build();
     }
 }

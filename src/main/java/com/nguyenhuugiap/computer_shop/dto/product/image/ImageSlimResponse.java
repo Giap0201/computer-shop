@@ -11,10 +11,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-
-public class ProductImageResponse {
+public class ImageSlimResponse {
     Long id;
     String imageUrl;
     int displayOrder;
-    Long productId;
 }

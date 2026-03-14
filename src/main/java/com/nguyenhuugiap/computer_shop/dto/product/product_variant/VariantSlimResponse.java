@@ -16,8 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-
-public class ProductVariantResponse {
+public class VariantSlimResponse {
     Long id;
     String skuCode;
     BigDecimal price;
@@ -25,7 +24,6 @@ public class ProductVariantResponse {
     Long version;
     String imageUrl;
     VariantStatus status;
-    Long productId;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     List<VariantAttributeResponse> attributes;
