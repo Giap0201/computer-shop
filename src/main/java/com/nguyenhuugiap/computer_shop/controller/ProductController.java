@@ -4,6 +4,7 @@ import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.AdminProductDetailResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.ProductCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.ProductResponse;
+import com.nguyenhuugiap.computer_shop.dto.product.UpdateProductStatusRequest;
 import com.nguyenhuugiap.computer_shop.service.interfaces.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -54,6 +55,13 @@ public class ProductController {
     ApiResponse<AdminProductDetailResponse> adminGetProductDetail(@PathVariable long productId) {
         return ApiResponse.<AdminProductDetailResponse>builder()
                 .result(productService.getAdminProductDetail(productId))
+                .build();
+    }
+
+    @PatchMapping("/{productId}/status")
+    ApiResponse<ProductResponse> updateProductStatus(@PathVariable long productId, @RequestBody @Valid UpdateProductStatusRequest request) {
+        return ApiResponse.<ProductResponse>builder()
+                .result(productService.updateProductStatus(productId, request))
                 .build();
     }
 }

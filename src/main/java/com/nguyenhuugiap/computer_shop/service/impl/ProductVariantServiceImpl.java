@@ -111,6 +111,10 @@ public class ProductVariantServiceImpl implements ProductVariantService {
                 && productVariantRepository.existsBySkuCode(request.getSkuCode())) {
             throw new AppException(ErrorCode.SKU_CODE_EXISTS);
         }
+        if(productVariant.getProduct().getMinPrice() == null ||
+                request.getPrice().compareTo(productVariant.getProduct().getMinPrice()) < 0) {
+            productVariant.getProduct().setMinPrice(request.getPrice());
+        }
         productVariantMapper.updateProductVariant(productVariant, request);
         ProductVariant updatedVariant = productVariantRepository.save(productVariant);
         return productVariantMapper.toProductVariantResponse(updatedVariant);

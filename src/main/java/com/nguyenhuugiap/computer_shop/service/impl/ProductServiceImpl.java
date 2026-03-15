@@ -3,6 +3,7 @@ package com.nguyenhuugiap.computer_shop.service.impl;
 import com.nguyenhuugiap.computer_shop.dto.product.AdminProductDetailResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.ProductCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.ProductResponse;
+import com.nguyenhuugiap.computer_shop.dto.product.UpdateProductStatusRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.image.ImageSlimResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.VariantSlimResponse;
 import com.nguyenhuugiap.computer_shop.entity.*;
@@ -76,6 +77,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public AdminProductDetailResponse getAdminProductDetail(long id) {
         Product product = productRepository.findById(id).orElseThrow(() ->
@@ -93,5 +95,14 @@ public class ProductServiceImpl implements ProductService {
                 .productImageResponse(productImageResponses)
                 .productVariantResponse(variantSlimResponses)
                 .build();
+    }
+
+    @Override
+    public ProductResponse updateProductStatus(long id, UpdateProductStatusRequest request) {
+        Product product = productRepository.findById(id).orElseThrow(() ->
+                new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        product.setStatus(request.getProductStatus());
+        return productMapper.toProductResponse(productRepository.save(product));
     }
 }
