@@ -1,6 +1,5 @@
 package com.nguyenhuugiap.computer_shop.dto.product.product_variant;
 
-import com.nguyenhuugiap.computer_shop.enums.VariantStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

@@ -78,6 +78,13 @@ public enum ErrorCode {
     IMAGE_REQUIRED(4300, "Vui lòng thêm ảnh", HttpStatus.BAD_REQUEST),
     TOO_MANY_IMAGES(4301, "Không thể upload hơn 10 ảnh một lúc", HttpStatus.BAD_REQUEST),
     IMAGE_NOT_FOUND(4302, "Ảnh không tồn tại", HttpStatus.NOT_FOUND),
+
+    // ---CART(44xx)
+    PRODUCT_VARIANT_REQUIRED(4401, "Vui lòng thêm 1 sản phẩm", HttpStatus.BAD_REQUEST),
+    QUANTITY_REQUIRED(4402, "Vui lòng thêm số lượng", HttpStatus.BAD_REQUEST),
+    QUANTITY_INVALID(4403, "Số lượng trong giỏ phải lớn hơn 0", HttpStatus.BAD_REQUEST),
+
+
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
     CATEGORY_TOO_LONG(4502, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
@@ -86,7 +93,6 @@ public enum ErrorCode {
     CANNOT_DELETE_HAS_CHILDREN(4505, "Không thể xoá danh mục đang chứa danh mục con", HttpStatus.BAD_REQUEST),
     CANNOT_UPDATE_CATEGORY(4506, "Không thể cập nhật danh mục này", HttpStatus.BAD_REQUEST),
     ;
-
 
 
     private int code;

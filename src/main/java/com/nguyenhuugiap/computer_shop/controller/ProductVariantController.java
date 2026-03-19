@@ -5,7 +5,6 @@ import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVarian
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantResponse;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.product.product_variant.ProductVariantUpdateStatusRequest;
-import com.nguyenhuugiap.computer_shop.enums.VariantStatus;
 import com.nguyenhuugiap.computer_shop.service.interfaces.ProductVariantService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;

@@ -2,7 +2,6 @@ package com.nguyenhuugiap.computer_shop.dto.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nguyenhuugiap.computer_shop.dto.brand.BrandResponse;
-import com.nguyenhuugiap.computer_shop.dto.category.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.dto.category.CategorySlimResponse;
 import com.nguyenhuugiap.computer_shop.enums.ProductStatus;
 import lombok.*;
