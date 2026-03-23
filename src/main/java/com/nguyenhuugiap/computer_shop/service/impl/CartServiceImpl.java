@@ -81,7 +81,7 @@ public class CartServiceImpl implements CartService {
                     .quantity(quantityToAdd)
                     .build();
             try {
-                cartItemRepository.save(newItem);
+                cartItemRepository.saveAndFlush(newItem);
             } catch (DataIntegrityViolationException e) {
             }
         }
@@ -101,7 +101,7 @@ public class CartServiceImpl implements CartService {
             } catch (NumberFormatException e) {
                 log.error("NumberFormatException", e);
             }
-        } else if (sessionId != null || !sessionId.isBlank()) {
+        } else if (sessionId != null && !sessionId.isBlank()) {
             cart = cartRepository.findBySessionId(sessionId).orElse(null);
         }
         if (cart == null) {

@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE CartItem c set c.quantity = c.quantity+ :addedQuantity " +
             "where c.cart.id = :cartId and c.productVariant.id=:variantId")
     int addQuantityToExistingItem(@Param("cartId") Long cartId,
