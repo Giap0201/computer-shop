@@ -85,7 +85,37 @@ public class CartServiceImpl implements CartService {
             } catch (DataIntegrityViolationException e) {
             }
         }
+        return buildCartResponse(cart, username);
+    }
 
+    @Override
+    public CartResponse getCart(String sessionId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isAuthenticated = username != null && !username.equals("anonymousUser");
+
+        Cart cart = null;
+        if (isAuthenticated) {
+            try {
+                Long userId = Long.valueOf(username);
+                cart = cartRepository.findByUser_Id(userId).orElse(null);
+            } catch (NumberFormatException e) {
+                log.error("NumberFormatException", e);
+            }
+        } else if (sessionId != null || !sessionId.isBlank()) {
+            cart = cartRepository.findBySessionId(sessionId).orElse(null);
+        }
+        if (cart == null) {
+            return CartResponse.builder()
+                    .items(List.of())
+                    .totalItems(0)
+                    .totalPrice(BigDecimal.ZERO)
+                    .sessionId(sessionId)
+                    .build();
+        }
+        return buildCartResponse(cart, isAuthenticated ? username : null);
+    }
+
+    private CartResponse buildCartResponse(Cart cart, String username) {
         List<CartItem> currentItems = cartItemRepository.findAllByCart_Id(cart.getId());
 
         List<CartItemResponse> items = currentItems.stream()
@@ -110,7 +140,8 @@ public class CartServiceImpl implements CartService {
 
         String responseSessionId = cart.getSessionId();
 
-        Long responseUserId = isAuthenticated ? Long.valueOf(username) : null;
+        Long responseUserId = (username != null && !username.equals("anonymousUser"))
+                ? Long.valueOf(username) : null;
 
         return CartResponse.builder()
                 .id(cart.getId())
@@ -121,5 +152,4 @@ public class CartServiceImpl implements CartService {
                 .userId(responseUserId)
                 .build();
     }
-
 }

@@ -8,12 +8,18 @@ import java.util.Optional;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
     @EntityGraph(attributePaths = {
-            "cartItems", "cartItems.productVariant", "cartItems.productVariant.product", "cartItems.productVariant.attributeValues"
+            "cartItems",
+            "cartItems.productVariant",
+            "cartItems.productVariant.product",
+            "cartItems.productVariant.attributeValues"
     })
     Optional<Cart> findBySessionId(String sessionId);
 
     @EntityGraph(attributePaths = {
-            "cartItems", "cartItems.productVariant", "cartItems.productVariant.product", "cartItems.productVariant.attributeValues"
+            "cartItems",
+            "cartItems.productVariant",
+            "cartItems.productVariant.product",
+            "cartItems.productVariant.attributeValues"
     })
     Optional<Cart> findByUser_Id(Long userId);
 }
