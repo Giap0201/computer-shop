@@ -85,6 +85,8 @@ public enum ErrorCode {
     QUANTITY_INVALID(4403, "Số lượng trong giỏ phải lớn hơn 0", HttpStatus.BAD_REQUEST),
     INSUFFICIENT_STOCK(4404, "Số lượng yêu cầu vượt quá tồn kho", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND_IN_CART(4405, "Sản phẩm không tồn tại trong giỏ hàng", HttpStatus.NOT_FOUND),
+    CANNOT_REMOVE_PRODUCT_FROM_CART(4406, "Không thể xoá sản phẩm khỏi giỏ hàng", HttpStatus.BAD_REQUEST),
+
 
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

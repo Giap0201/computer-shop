@@ -23,7 +23,7 @@ public class CartController {
     CartService cartService;
     CookieUtils cookieUtils;
 
-    @PostMapping("/item")
+    @PostMapping("/items")
     ResponseEntity<ApiResponse<CartResponse>> addItemToCart(@RequestBody @Valid CartItemCreationRequest request,
                                                             @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
         CartResponse cartResponse = cartService.addToCart(request, sessionId);
@@ -50,11 +50,20 @@ public class CartController {
     @PatchMapping("/items/{productVariantId}/quantity")
     ResponseEntity<ApiResponse<CartResponse>> updateItemQuantity(@PathVariable Long productVariantId,
                                                                  @RequestParam(name = "value") long newQuantity,
-                                                                 @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId){
+                                                                 @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
         ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
                 .result(cartService.updateItemQuantity(sessionId, productVariantId, newQuantity))
                 .build();
         return ResponseEntity.ok().body(response);
     }
 
+    @DeleteMapping("/items/{productVariantId}")
+    ResponseEntity<ApiResponse<CartResponse>> deleteItem(@PathVariable Long productVariantId,
+                                                         @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
+        ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
+                .result(cartService.removeItem(sessionId, productVariantId))
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 }

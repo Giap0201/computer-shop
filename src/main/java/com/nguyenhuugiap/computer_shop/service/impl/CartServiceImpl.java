@@ -218,9 +218,43 @@ public class CartServiceImpl implements CartService {
         return buildCartResponse(cart, username);
     }
 
+    @Transactional
     @Override
     public CartResponse removeItem(String sessionId, Long productVariantId) {
-        return null;
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isAuthenticated = username != null && !username.equals("anonymousUser");
+        Cart cart = null;
+        if (isAuthenticated) {
+            try {
+                Long userId = Long.valueOf(username);
+                cart = cartRepository.findByUser_Id(userId).orElse(null);
+            } catch (NumberFormatException e) {
+                log.error("NumberFormatException", e);
+            }
+        } else if (sessionId != null && !sessionId.isBlank()) {
+            cart = cartRepository.findBySessionId(sessionId).orElse(null);
+        }
+        if (cart == null) {
+            return CartResponse.builder()
+                    .items(List.of())
+                    .totalItems(0)
+                    .totalPrice(BigDecimal.ZERO)
+                    .sessionId(sessionId)
+                    .build();
+        }
+
+        List<CartItem> cartItems = cart.getCartItems();
+        CartItem removeItem = null;
+        for (CartItem cartItem : cartItems){
+            if(cartItem.getProductVariant().getId().equals(productVariantId)){
+                removeItem = cartItem;
+                break;
+            }
+        }
+        if(removeItem == null) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND_IN_CART);
+        cartItems.remove(removeItem);
+        cartItemRepository.delete(removeItem);
+        return buildCartResponse(cart, username);
     }
 
 
