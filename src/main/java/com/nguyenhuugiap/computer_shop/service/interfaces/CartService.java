@@ -7,6 +7,6 @@ public interface CartService {
     CartResponse addToCart(CartItemCreationRequest request, String sessionId);
     CartResponse getCart(String sessionId);
     void mergeCart(String sessionId, Long userId);
-    CartResponse updateItemQuantity(String sessionId, Long productVariantId, long quantity);
+    CartResponse updateItemQuantity(String sessionId, Long productVariantId, long newQuantity);
     CartResponse removeItem(String sessionId, Long productVariantId);
 }

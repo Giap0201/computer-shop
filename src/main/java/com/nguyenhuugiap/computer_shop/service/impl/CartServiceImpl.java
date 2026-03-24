@@ -76,7 +76,7 @@ public class CartServiceImpl implements CartService {
 
         // check if stock is valid
         ProductVariant productVariant = productVariantService.getEntityProductVariant(variantId);
-        if(quantityToAdd > productVariant.getStockQuantity()){
+        if (quantityToAdd > productVariant.getStockQuantity()) {
             throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
         }
         int updatedRows = cartItemRepository.addQuantityToExistingItem(cart.getId(), variantId, quantityToAdd);
@@ -161,7 +161,7 @@ public class CartServiceImpl implements CartService {
                 long combinedQuantity = existingUserItem.getQuantity() + guestItem.getQuantity();
 
                 // check if stock is valid
-                if(combinedQuantity > currentStock) combinedQuantity = currentStock;
+                if (combinedQuantity > currentStock) combinedQuantity = currentStock;
                 existingUserItem.setQuantity(combinedQuantity);
                 itemsToDelete.add(guestItem);
             } else {
@@ -176,9 +176,46 @@ public class CartServiceImpl implements CartService {
         cartRepository.delete(guestCart);
     }
 
+    @Transactional
     @Override
-    public CartResponse updateItemQuantity(String sessionId, Long productVariantId, long quantity) {
-        return null;
+    public CartResponse updateItemQuantity(String sessionId, Long productVariantId, long newQuantity) {
+        if (newQuantity < 1) {
+            return removeItem(sessionId, productVariantId);
+        }
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isAuthenticated = username != null && !username.equals("anonymousUser");
+        Cart cart = null;
+        if (isAuthenticated) {
+            try {
+                Long userId = Long.valueOf(username);
+                cart = cartRepository.findByUser_Id(userId).orElse(null);
+            } catch (NumberFormatException e) {
+                log.error("NumberFormatException", e);
+            }
+        } else if (sessionId != null && !sessionId.isBlank()) {
+            cart = cartRepository.findBySessionId(sessionId).orElse(null);
+        }
+        if (cart == null) {
+            return CartResponse.builder()
+                    .items(List.of())
+                    .totalItems(0)
+                    .totalPrice(BigDecimal.ZERO)
+                    .sessionId(sessionId)
+                    .build();
+        }
+
+        List<CartItem> cartItems = cart.getCartItems();
+        boolean checkUpdate = false;
+        for (CartItem cartItem : cartItems) {
+            if (cartItem.getProductVariant().getId().equals(productVariantId)) {
+                long stock = cartItem.getProductVariant().getStockQuantity();
+                cartItem.setQuantity(Math.min(newQuantity, stock));
+                checkUpdate = true;
+                break;
+            }
+        }
+        if (!checkUpdate) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND_IN_CART);
+        return buildCartResponse(cart, username);
     }
 
     @Override

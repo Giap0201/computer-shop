@@ -47,4 +47,14 @@ public class CartController {
                 .build();
     }
 
+    @PatchMapping("/items/{productVariantId}/quantity")
+    ResponseEntity<ApiResponse<CartResponse>> updateItemQuantity(@PathVariable Long productVariantId,
+                                                                 @RequestParam(name = "value") long newQuantity,
+                                                                 @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId){
+        ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
+                .result(cartService.updateItemQuantity(sessionId, productVariantId, newQuantity))
+                .build();
+        return ResponseEntity.ok().body(response);
+    }
+
 }
