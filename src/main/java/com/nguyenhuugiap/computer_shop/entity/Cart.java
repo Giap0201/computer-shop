@@ -28,4 +28,10 @@ public class Cart extends BaseEntity {
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CartItem> cartItems = new ArrayList<>();
+
+    public void addItem(CartItem item){
+        if(cartItems == null) cartItems = new ArrayList<>();
+        cartItems.add(item);
+        item.setCart(this);
+    }
 }

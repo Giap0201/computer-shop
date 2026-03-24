@@ -1,18 +1,19 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
-import com.nguyenhuugiap.computer_shop.dto.authenticate.AuthenticateRequest;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.IntrospectRequest;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.LogoutRequest;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.RefreshTokenRequest;
 import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.AuthenticateResponse;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.IntrospectResponse;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.*;
+import com.nguyenhuugiap.computer_shop.security.CookieUtils;
 import com.nguyenhuugiap.computer_shop.service.interfaces.AuthenticateService;
+import com.nguyenhuugiap.computer_shop.service.interfaces.CartService;
 import com.nimbusds.jose.JOSEException;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -23,12 +24,27 @@ import java.text.ParseException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticateController {
     AuthenticateService authenticateService;
+    CookieUtils cookieUtils;
+    CartService cartService;
 
     @PostMapping("/login")
-    public ApiResponse<AuthenticateResponse> authenticate(@RequestBody AuthenticateRequest authenticateRequest) {
-        return ApiResponse.<AuthenticateResponse>builder()
-                .result(authenticateService.authenticate(authenticateRequest))
+    ResponseEntity<ApiResponse<AuthenticateResponse>> authenticate(
+            @RequestBody @Valid AuthenticateRequest request,
+            @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
+        AuthenticateResponse authResponse = authenticateService.authenticate(request);
+
+        if (authResponse.isAuthenticated()) {
+            cartService.mergeCart(sessionId, authResponse.getUserId());
+        }
+        ResponseCookie deleteCookie = cookieUtils.deleteCartSessionCookie();
+        ApiResponse<AuthenticateResponse> response = ApiResponse.<AuthenticateResponse>builder()
+                .result(authResponse)
                 .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .body(response);
+
     }
 
     @PostMapping("/introspect")

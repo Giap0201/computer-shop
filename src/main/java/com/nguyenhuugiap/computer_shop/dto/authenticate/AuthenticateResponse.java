@@ -12,4 +12,5 @@ public class AuthenticateResponse {
     String token;
     String refreshToken;
     boolean authenticated;
+    Long userId;
 }

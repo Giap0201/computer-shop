@@ -22,8 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -72,17 +71,19 @@ public class CartServiceImpl implements CartService {
         }
         Long variantId = request.getProductVariantId();
         int quantityToAdd = request.getQuantity();
-        ProductVariant variantProxy = productVariantService.getEntityProductVariant(variantId);
         int updatedRows = cartItemRepository.addQuantityToExistingItem(cart.getId(), variantId, quantityToAdd);
         if (updatedRows == 0) {
+            ProductVariant variantProxy = productVariantService.getEntityProductVariant(variantId);
             CartItem newItem = CartItem.builder()
                     .cart(cart)
                     .productVariant(variantProxy)
                     .quantity(quantityToAdd)
                     .build();
             try {
-                cartItemRepository.saveAndFlush(newItem);
+                cartItemRepository.save(newItem);
             } catch (DataIntegrityViolationException e) {
+                log.error("Conflict khi lưu CartItem", e);
+//                throw new RuntimeException("Lỗi đồng bộ dữ liệu giỏ hàng");
             }
         }
         return buildCartResponse(cart, username);
@@ -114,6 +115,55 @@ public class CartServiceImpl implements CartService {
         }
         return buildCartResponse(cart, isAuthenticated ? username : null);
     }
+
+    @Transactional
+    @Override
+    public void mergeCart(String sessionId, Long userId) {
+        if (sessionId == null || sessionId.isBlank()) return;
+
+        Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
+        if (guestCart == null) return;
+
+        List<CartItem> guestItems = cartItemRepository.findAllByCart_Id(guestCart.getId());
+        if (guestItems.isEmpty()) {
+            cartRepository.delete(guestCart);
+            return;
+        }
+
+        Cart userCart = cartRepository.findByUser_Id(userId).orElseGet(() -> {
+            Cart newCart = Cart.builder()
+                    .user(userRepository.getReferenceById(userId))
+                    .build();
+            return cartRepository.save(newCart);
+        });
+
+        List<CartItem> userItems = cartItemRepository.findAllByCart_Id(userCart.getId());
+        Map<Long, CartItem> userItemMap = new HashMap<>();
+        for (CartItem item : userItems) {
+            userItemMap.put(item.getProductVariant().getId(), item);
+        }
+
+        List<CartItem> itemsToDelete = new ArrayList<>();
+
+        for (CartItem guestItem : guestItems) {
+            Long variantId = guestItem.getProductVariant().getId();
+
+            if (userItemMap.containsKey(variantId)) {
+                CartItem existingUserItem = userItemMap.get(variantId);
+                existingUserItem.setQuantity(existingUserItem.getQuantity() + guestItem.getQuantity());
+                itemsToDelete.add(guestItem);
+            } else {
+                userCart.addItem(guestItem);
+                cartItemRepository.save(guestItem);
+            }
+        }
+
+        if (!itemsToDelete.isEmpty()) {
+            cartItemRepository.deleteAll(itemsToDelete);
+        }
+        cartRepository.delete(guestCart);
+    }
+
 
     private CartResponse buildCartResponse(Cart cart, String username) {
         List<CartItem> currentItems = cartItemRepository.findAllByCart_Id(cart.getId());
