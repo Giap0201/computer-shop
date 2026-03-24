@@ -14,7 +14,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
             "where c.cart.id = :cartId and c.productVariant.id=:variantId")
     int addQuantityToExistingItem(@Param("cartId") Long cartId,
                                   @Param("variantId") Long variantId,
-                                  @Param("addedQuantity") Integer addedQuantity);
+                                  @Param("addedQuantity") Long addedQuantity);
 
     @Query("""
             SELECT DISTINCT ci

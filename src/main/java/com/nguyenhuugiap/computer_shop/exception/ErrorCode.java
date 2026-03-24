@@ -83,7 +83,7 @@ public enum ErrorCode {
     PRODUCT_VARIANT_REQUIRED(4401, "Vui lòng thêm 1 sản phẩm", HttpStatus.BAD_REQUEST),
     QUANTITY_REQUIRED(4402, "Vui lòng thêm số lượng", HttpStatus.BAD_REQUEST),
     QUANTITY_INVALID(4403, "Số lượng trong giỏ phải lớn hơn 0", HttpStatus.BAD_REQUEST),
-
+    INSUFFICIENT_STOCK(4404, "Số lượng yêu cầu vượt quá tồn kho", HttpStatus.BAD_REQUEST),
 
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

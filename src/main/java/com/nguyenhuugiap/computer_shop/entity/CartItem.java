@@ -20,7 +20,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class CartItem extends BaseEntity {
 
     @Column(name = "quantity", nullable = false)
-    int quantity;
+    Long quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)

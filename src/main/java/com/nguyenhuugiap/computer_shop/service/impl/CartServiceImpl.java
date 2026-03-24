@@ -6,6 +6,8 @@ import com.nguyenhuugiap.computer_shop.dto.cart.CartResponse;
 import com.nguyenhuugiap.computer_shop.entity.Cart;
 import com.nguyenhuugiap.computer_shop.entity.CartItem;
 import com.nguyenhuugiap.computer_shop.entity.ProductVariant;
+import com.nguyenhuugiap.computer_shop.exception.AppException;
+import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.mapper.CartItemMapper;
 import com.nguyenhuugiap.computer_shop.repository.CartItemRepository;
 import com.nguyenhuugiap.computer_shop.repository.CartRepository;
@@ -70,7 +72,13 @@ public class CartServiceImpl implements CartService {
             }
         }
         Long variantId = request.getProductVariantId();
-        int quantityToAdd = request.getQuantity();
+        long quantityToAdd = request.getQuantity();
+
+        // check if stock is valid
+        ProductVariant productVariant = productVariantService.getEntityProductVariant(variantId);
+        if(quantityToAdd > productVariant.getStockQuantity()){
+            throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+        }
         int updatedRows = cartItemRepository.addQuantityToExistingItem(cart.getId(), variantId, quantityToAdd);
         if (updatedRows == 0) {
             ProductVariant variantProxy = productVariantService.getEntityProductVariant(variantId);
@@ -147,10 +155,14 @@ public class CartServiceImpl implements CartService {
 
         for (CartItem guestItem : guestItems) {
             Long variantId = guestItem.getProductVariant().getId();
-
+            long currentStock = guestItem.getProductVariant().getStockQuantity();
             if (userItemMap.containsKey(variantId)) {
                 CartItem existingUserItem = userItemMap.get(variantId);
-                existingUserItem.setQuantity(existingUserItem.getQuantity() + guestItem.getQuantity());
+                long combinedQuantity = existingUserItem.getQuantity() + guestItem.getQuantity();
+
+                // check if stock is valid
+                if(combinedQuantity > currentStock) combinedQuantity = currentStock;
+                existingUserItem.setQuantity(combinedQuantity);
                 itemsToDelete.add(guestItem);
             } else {
                 userCart.addItem(guestItem);
@@ -162,6 +174,16 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.deleteAll(itemsToDelete);
         }
         cartRepository.delete(guestCart);
+    }
+
+    @Override
+    public CartResponse updateItemQuantity(String sessionId, Long productVariantId, long quantity) {
+        return null;
+    }
+
+    @Override
+    public CartResponse removeItem(String sessionId, Long productVariantId) {
+        return null;
     }
 
 
@@ -184,8 +206,8 @@ public class CartServiceImpl implements CartService {
                 .map(CartItemResponse::getSubTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        int totalItemsCount = items.stream()
-                .mapToInt(CartItemResponse::getQuantity)
+        long totalItemsCount = items.stream()
+                .mapToLong(CartItemResponse::getQuantity)
                 .sum();
 
         String responseSessionId = cart.getSessionId();

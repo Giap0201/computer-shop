@@ -18,7 +18,7 @@ public class CartItemResponse {
     String productName;
     List<VariantAttributeResponse> attributes;
     String imageUrl;
-    Integer quantity;
+    long quantity;
     BigDecimal unitPrice;
     BigDecimal subTotal;
 }

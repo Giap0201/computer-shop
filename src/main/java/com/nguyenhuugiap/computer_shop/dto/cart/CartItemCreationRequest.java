@@ -16,5 +16,5 @@ public class CartItemCreationRequest {
 
     @NotNull(message = "QUANTITY_REQUIRED")
     @Min(value = 0, message = "QUANTITY_INVALID")
-    Integer quantity;
+    Long quantity;
 }

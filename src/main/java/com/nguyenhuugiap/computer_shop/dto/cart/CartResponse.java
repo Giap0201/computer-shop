@@ -17,7 +17,7 @@ public class CartResponse {
 
     List<CartItemResponse> items;
 
-    Integer totalItems;
+    long totalItems;
     BigDecimal totalPrice;
     Long userId;
     String sessionId;
