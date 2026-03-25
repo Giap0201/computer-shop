@@ -18,5 +18,5 @@ public interface CartService {
 
     CartResponse removeItems(String sessionId, List<Long> listProductVariantId);
 
-    CartResponse clearItem(String sessionId);
+    CartResponse clearCart(String sessionId);
 }

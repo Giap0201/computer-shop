@@ -220,14 +220,51 @@ public class CartServiceImpl implements CartService {
         return buildCartResponse(cart);
     }
 
+    @Transactional
     @Override
     public CartResponse removeItems(String sessionId, List<Long> listProductVariantId) {
-        return null;
+        Cart cart = checkCart(sessionId);
+        if (cart == null) {
+            return CartResponse.builder()
+                    .items(List.of())
+                    .totalItems(0)
+                    .totalPrice(BigDecimal.ZERO)
+                    .sessionId(sessionId)
+                    .build();
+        }
+
+        List<CartItem> cartItems = cart.getCartItems();
+        List<CartItem> itemsToDelete = new ArrayList<>();
+
+        for (CartItem item : cartItems) {
+            if (listProductVariantId.contains(item.getProductVariant().getId())) {
+                itemsToDelete.add(item);
+            }
+        }
+        if (!itemsToDelete.isEmpty()) {
+            cartItems.removeAll(itemsToDelete);
+            cartItemRepository.deleteAll(itemsToDelete);
+        }
+        return buildCartResponse(cart);
     }
 
+    @Transactional
     @Override
-    public CartResponse clearItem(String sessionId) {
-        return null;
+    public CartResponse clearCart(String sessionId) {
+        Cart cart = checkCart(sessionId);
+        if (cart != null) {
+            cartItemRepository.deleteAllByCart_Id(cart.getId());
+            if (!cart.getCartItems().isEmpty()) {
+                cart.getCartItems().clear();
+            }
+        }
+        return CartResponse.builder()
+                .items(List.of())
+                .totalItems(0)
+                .totalPrice(BigDecimal.ZERO)
+                .sessionId(sessionId)
+                .build();
+
     }
 
 

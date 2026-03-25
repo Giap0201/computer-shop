@@ -15,6 +15,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/carts")
 @RequiredArgsConstructor
@@ -24,8 +26,8 @@ public class CartController {
     CookieUtils cookieUtils;
 
     @PostMapping("/items")
-    ResponseEntity<ApiResponse<CartResponse>> addItemToCart(@RequestBody @Valid CartItemCreationRequest request,
-                                                            @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
+    public ResponseEntity<ApiResponse<CartResponse>> addItemToCart(@RequestBody @Valid CartItemCreationRequest request,
+                                                                   @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
         CartResponse cartResponse = cartService.addToCart(request, sessionId);
 
         ResponseCookie cookie = cookieUtils.createCartSessionCookie(cartResponse.getSessionId());
@@ -40,17 +42,17 @@ public class CartController {
     }
 
     @GetMapping("/my-cart")
-    ApiResponse<CartResponse> getMyCart(@CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false)
-                                        String sessionId) {
+    public ApiResponse<CartResponse> getMyCart(@CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false)
+                                               String sessionId) {
         return ApiResponse.<CartResponse>builder()
                 .result(cartService.getCart(sessionId))
                 .build();
     }
 
     @PatchMapping("/items/{productVariantId}/quantity")
-    ResponseEntity<ApiResponse<CartResponse>> updateItemQuantity(@PathVariable Long productVariantId,
-                                                                 @RequestParam(name = "value") long newQuantity,
-                                                                 @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
+    public ResponseEntity<ApiResponse<CartResponse>> updateItemQuantity(@PathVariable Long productVariantId,
+                                                                        @RequestParam(name = "value") long newQuantity,
+                                                                        @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
         ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
                 .result(cartService.updateItemQuantity(sessionId, productVariantId, newQuantity))
                 .build();
@@ -58,12 +60,29 @@ public class CartController {
     }
 
     @DeleteMapping("/items/{productVariantId}")
-    ResponseEntity<ApiResponse<CartResponse>> deleteItem(@PathVariable Long productVariantId,
-                                                         @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
+    public ResponseEntity<ApiResponse<CartResponse>> deleteItem(@PathVariable Long productVariantId,
+                                                                @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
         ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
                 .result(cartService.removeItem(sessionId, productVariantId))
                 .build();
 
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<CartResponse>> clearCart(@CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
+
+        ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
+                .result(cartService.clearCart(sessionId))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/items")
+    public ResponseEntity<ApiResponse<CartResponse>> deleteItems(@RequestParam(name = "ids") List<Long> productVariantIds,
+                                                                 @CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false) String sessionId) {
+        ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
+                .result(cartService.removeItems(sessionId, productVariantIds)).build();
         return ResponseEntity.ok(response);
     }
 }
