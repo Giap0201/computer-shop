@@ -94,25 +94,12 @@ public class CartServiceImpl implements CartService {
 //                throw new RuntimeException("Lỗi đồng bộ dữ liệu giỏ hàng");
             }
         }
-        return buildCartResponse(cart, username);
+        return buildCartResponse(cart);
     }
 
     @Override
     public CartResponse getCart(String sessionId) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        boolean isAuthenticated = username != null && !username.equals("anonymousUser");
-
-        Cart cart = null;
-        if (isAuthenticated) {
-            try {
-                Long userId = Long.valueOf(username);
-                cart = cartRepository.findByUser_Id(userId).orElse(null);
-            } catch (NumberFormatException e) {
-                log.error("NumberFormatException", e);
-            }
-        } else if (sessionId != null && !sessionId.isBlank()) {
-            cart = cartRepository.findBySessionId(sessionId).orElse(null);
-        }
+        Cart cart = checkCart(sessionId);
         if (cart == null) {
             return CartResponse.builder()
                     .items(List.of())
@@ -121,7 +108,7 @@ public class CartServiceImpl implements CartService {
                     .sessionId(sessionId)
                     .build();
         }
-        return buildCartResponse(cart, isAuthenticated ? username : null);
+        return buildCartResponse(cart);
     }
 
     @Transactional
@@ -182,19 +169,7 @@ public class CartServiceImpl implements CartService {
         if (newQuantity < 1) {
             return removeItem(sessionId, productVariantId);
         }
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        boolean isAuthenticated = username != null && !username.equals("anonymousUser");
-        Cart cart = null;
-        if (isAuthenticated) {
-            try {
-                Long userId = Long.valueOf(username);
-                cart = cartRepository.findByUser_Id(userId).orElse(null);
-            } catch (NumberFormatException e) {
-                log.error("NumberFormatException", e);
-            }
-        } else if (sessionId != null && !sessionId.isBlank()) {
-            cart = cartRepository.findBySessionId(sessionId).orElse(null);
-        }
+        Cart cart = checkCart(sessionId);
         if (cart == null) {
             return CartResponse.builder()
                     .items(List.of())
@@ -215,12 +190,48 @@ public class CartServiceImpl implements CartService {
             }
         }
         if (!checkUpdate) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND_IN_CART);
-        return buildCartResponse(cart, username);
+        return buildCartResponse(cart);
     }
 
     @Transactional
     @Override
     public CartResponse removeItem(String sessionId, Long productVariantId) {
+        Cart cart = checkCart(sessionId);
+        if (cart == null) {
+            return CartResponse.builder()
+                    .items(List.of())
+                    .totalItems(0)
+                    .totalPrice(BigDecimal.ZERO)
+                    .sessionId(sessionId)
+                    .build();
+        }
+
+        List<CartItem> cartItems = cart.getCartItems();
+        CartItem removeItem = null;
+        for (CartItem cartItem : cartItems) {
+            if (cartItem.getProductVariant().getId().equals(productVariantId)) {
+                removeItem = cartItem;
+                break;
+            }
+        }
+        if (removeItem == null) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND_IN_CART);
+        cartItems.remove(removeItem);
+        cartItemRepository.delete(removeItem);
+        return buildCartResponse(cart);
+    }
+
+    @Override
+    public CartResponse removeItems(String sessionId, List<Long> listProductVariantId) {
+        return null;
+    }
+
+    @Override
+    public CartResponse clearItem(String sessionId) {
+        return null;
+    }
+
+
+    private Cart checkCart(String sessionId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         boolean isAuthenticated = username != null && !username.equals("anonymousUser");
         Cart cart = null;
@@ -234,31 +245,11 @@ public class CartServiceImpl implements CartService {
         } else if (sessionId != null && !sessionId.isBlank()) {
             cart = cartRepository.findBySessionId(sessionId).orElse(null);
         }
-        if (cart == null) {
-            return CartResponse.builder()
-                    .items(List.of())
-                    .totalItems(0)
-                    .totalPrice(BigDecimal.ZERO)
-                    .sessionId(sessionId)
-                    .build();
-        }
-
-        List<CartItem> cartItems = cart.getCartItems();
-        CartItem removeItem = null;
-        for (CartItem cartItem : cartItems){
-            if(cartItem.getProductVariant().getId().equals(productVariantId)){
-                removeItem = cartItem;
-                break;
-            }
-        }
-        if(removeItem == null) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND_IN_CART);
-        cartItems.remove(removeItem);
-        cartItemRepository.delete(removeItem);
-        return buildCartResponse(cart, username);
+        return cart;
     }
 
 
-    private CartResponse buildCartResponse(Cart cart, String username) {
+    private CartResponse buildCartResponse(Cart cart) {
         List<CartItem> currentItems = cartItemRepository.findAllByCart_Id(cart.getId());
 
         List<CartItemResponse> items = currentItems.stream()
@@ -282,9 +273,7 @@ public class CartServiceImpl implements CartService {
                 .sum();
 
         String responseSessionId = cart.getSessionId();
-
-        Long responseUserId = (username != null && !username.equals("anonymousUser"))
-                ? Long.valueOf(username) : null;
+        Long userId = cart.getUser() == null ? null : cart.getUser().getId();
 
         return CartResponse.builder()
                 .id(cart.getId())
@@ -292,7 +281,7 @@ public class CartServiceImpl implements CartService {
                 .totalItems(totalItemsCount)
                 .totalPrice(total)
                 .sessionId(responseSessionId)
-                .userId(responseUserId)
+                .userId(userId)
                 .build();
     }
 }
