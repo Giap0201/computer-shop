@@ -3,6 +3,7 @@ package com.nguyenhuugiap.computer_shop.service.interfaces;
 import com.nguyenhuugiap.computer_shop.dto.cart.CartItemCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.cart.CartResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CartService {
@@ -19,4 +20,6 @@ public interface CartService {
     CartResponse removeItems(String sessionId, List<Long> listProductVariantId);
 
     CartResponse clearCart(String sessionId);
+
+    void deleteGuestCarts(LocalDateTime threshold);
 }

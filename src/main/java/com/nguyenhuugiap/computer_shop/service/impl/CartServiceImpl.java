@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -265,6 +266,13 @@ public class CartServiceImpl implements CartService {
                 .sessionId(sessionId)
                 .build();
 
+    }
+
+    @Transactional
+    @Override
+    public void deleteGuestCarts(LocalDateTime threshold) {
+        List<Cart> carts = cartRepository.findAllByUpdatedAtBeforeAndUserIsNull(threshold);
+        cartRepository.deleteAll(carts);
     }
 
 

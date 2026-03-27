@@ -26,7 +26,12 @@ public class Cart extends BaseEntity {
     @JoinColumn(name = "user_id", unique = true)
     User user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "cart",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, // luu cha tu luu con va xoa cha tu xoa con
+            orphanRemoval = true // Xoa variant khoi list thi xoa luon trong db
+    )
     List<CartItem> cartItems = new ArrayList<>();
 
     public void addItem(CartItem item){
