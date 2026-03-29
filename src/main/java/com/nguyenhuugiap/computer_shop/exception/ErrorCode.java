@@ -87,14 +87,32 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND_IN_CART(4405, "Sản phẩm không tồn tại trong giỏ hàng", HttpStatus.NOT_FOUND),
     CANNOT_REMOVE_PRODUCT_FROM_CART(4406, "Không thể xoá sản phẩm khỏi giỏ hàng", HttpStatus.BAD_REQUEST),
 
+    // --- ORDER(45XX) ---
+    INVALID_QUANTITY(4501, "Số lượng không hợp lệ", HttpStatus.BAD_REQUEST),
+    QUANTITY_PD_OR_REQUIRED(4502, "Số lượng không được để trống", HttpStatus.BAD_REQUEST),
+    VARIANT_ID_REQUIRED(4503, "Mã sản phẩm không được để trống", HttpStatus.BAD_REQUEST),
+    INVALID_VARIANT_ID(4504, "Mã sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
+
+    SHIPPING_NAME_REQUIRED(4510, "Tên người nhận không được để trống", HttpStatus.BAD_REQUEST),
+    INVALID_SHIPPING_NAME(4511, "Tên người nhận không hợp lệ", HttpStatus.BAD_REQUEST),
+
+    SHIPPING_PHONE_REQUIRED(4512, "Số điện thoại không được để trống", HttpStatus.BAD_REQUEST),
+    INVALID_SHIPPING_PHONE(4513, "Số điện thoại không hợp lệ", HttpStatus.BAD_REQUEST),
+
+    SHIPPING_ADDRESS_REQUIRED(4514, "Địa chỉ giao hàng không được để trống", HttpStatus.BAD_REQUEST),
+
+    ITEMS_REQUIRED(4515, "Danh sách sản phẩm không được để trống", HttpStatus.BAD_REQUEST),
+    INVALID_ITEMS(4516, "Danh sách sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
+
+    PAYMENT_METHOD_REQUIRED(4517, "Phương thức thanh toán không được để trống", HttpStatus.BAD_REQUEST),
 
     // --- CATEGORY (45XX) ---
-    CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
-    CATEGORY_TOO_LONG(4502, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
-    CATEGORY_EXISTS(4503, "Danh mục này đã tồn tại", HttpStatus.BAD_REQUEST),
-    CATEGORY_NOT_FOUND(4504, "Danh mục không tồn tại", HttpStatus.NOT_FOUND),
-    CANNOT_DELETE_HAS_CHILDREN(4505, "Không thể xoá danh mục đang chứa danh mục con", HttpStatus.BAD_REQUEST),
-    CANNOT_UPDATE_CATEGORY(4506, "Không thể cập nhật danh mục này", HttpStatus.BAD_REQUEST),
+    CATEGORY_NAME_REQUIRED(4601, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
+    CATEGORY_TOO_LONG(4602, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
+    CATEGORY_EXISTS(4603, "Danh mục này đã tồn tại", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_FOUND(4604, "Danh mục không tồn tại", HttpStatus.NOT_FOUND),
+    CANNOT_DELETE_HAS_CHILDREN(4605, "Không thể xoá danh mục đang chứa danh mục con", HttpStatus.BAD_REQUEST),
+    CANNOT_UPDATE_CATEGORY(4606, "Không thể cập nhật danh mục này", HttpStatus.BAD_REQUEST),
     ;
 
 
