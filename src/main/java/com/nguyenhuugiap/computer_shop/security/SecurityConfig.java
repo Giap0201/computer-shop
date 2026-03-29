@@ -29,7 +29,7 @@ import java.util.List;
 public class SecurityConfig {
 
     String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/**"};
-    String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**"};
+    String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**", "/uploads/**"};
     String[] PRODUCTS_PUBLIC_ENDPOINTS = {"/products/**", "/attributes/**"};
     JwtAuthenticationFilter jwtAuthenticationFilter;
     CustomAccessDeniedHandler customAccessDeniedHandler;
@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PATCH, "carts/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "carts/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/files/**").hasRole("ADMIN")
-//                                .requestMatchers(HttpMethod.GET, CATEGORIES_PUBLIC_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.GET, CATEGORIES_PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
