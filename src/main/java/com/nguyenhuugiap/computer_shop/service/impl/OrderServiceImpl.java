@@ -49,6 +49,10 @@ public class OrderServiceImpl implements OrderService {
         User user = getUser();
         String orderCode = handlingOrderCode();
 
+        // Validate data cart
+        if (request.isFromCart()) {
+            handlingCartItem(request.getItems());
+        }
         List<OrderItem> items = new ArrayList<>();
         if (request.getItems() != null) {
             items = handlingOrderItems(request.getItems());
@@ -152,6 +156,30 @@ public class OrderServiceImpl implements OrderService {
             orderItems.add(orderItem);
         }
         return orderItems;
+    }
+
+    private void handlingCartItem(List<OrderItemRequest> requests) {
+        Cart currentCart = cartService.getCartEntity();
+        if (currentCart == null || currentCart.getCartItems().isEmpty()) {
+            throw new AppException(ErrorCode.CART_IS_EMPTY);
+        }
+
+        // Tạo Map: Key = variantId, Value = quantity đang có trong giỏ
+        Map<Long, Integer> cartItemMap = currentCart.getCartItems().stream()
+                .collect(Collectors.toMap(
+                        item -> item.getProductVariant().getId(),
+                        item -> (Math.toIntExact(item.getQuantity()))
+                ));
+
+        for (OrderItemRequest reqItem : requests) {
+            Integer quantityInCart = cartItemMap.get(reqItem.getVariantId());
+            if (quantityInCart == null) {
+                throw new AppException(ErrorCode.INVALID_CART_DATA);
+            }
+            if (!quantityInCart.equals(reqItem.getQuantity())) {
+                throw new AppException(ErrorCode.INVALID_CART_DATA);
+            }
+        }
     }
 
     @Override

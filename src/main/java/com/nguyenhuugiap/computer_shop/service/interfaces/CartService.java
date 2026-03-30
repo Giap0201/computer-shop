@@ -2,6 +2,7 @@ package com.nguyenhuugiap.computer_shop.service.interfaces;
 
 import com.nguyenhuugiap.computer_shop.dto.cart.CartItemCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.cart.CartResponse;
+import com.nguyenhuugiap.computer_shop.entity.Cart;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,7 +11,7 @@ public interface CartService {
     CartResponse addToCart(CartItemCreationRequest request, String sessionId);
 
     CartResponse getCart(String sessionId);
-
+    Cart getCartEntity();
     void mergeCart(String sessionId, Long userId);
 
     CartResponse updateItemQuantity(String sessionId, Long productVariantId, long newQuantity);

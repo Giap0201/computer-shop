@@ -27,7 +27,7 @@ public class OrderCreationRequest {
 
     String note;
 
-    boolean isFromCart;
+    boolean fromCart;
 
     @NotNull(message = "PAYMENT_METHOD_REQUIRED")
     PaymentMethod paymentMethod = PaymentMethod.VNPAY;

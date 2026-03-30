@@ -112,6 +112,11 @@ public class CartServiceImpl implements CartService {
         return buildCartResponse(cart);
     }
 
+    @Override
+    public Cart getCartEntity() {
+        return checkCart(null);
+    }
+
     @Transactional
     @Override
     public void mergeCart(String sessionId, Long userId) {

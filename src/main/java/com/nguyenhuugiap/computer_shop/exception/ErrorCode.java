@@ -102,7 +102,8 @@ public enum ErrorCode {
     INVALID_ITEMS(4516, "Danh sách sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
     PAYMENT_METHOD_REQUIRED(4517, "Phương thức thanh toán không được để trống", HttpStatus.BAD_REQUEST),
     CANNOT_CREATE_ORDER_CODE(4518, "Không thể tạo mã đơn hàng", HttpStatus.INTERNAL_SERVER_ERROR),
-
+    CART_IS_EMPTY(4519, "Giỏ hàng trống", HttpStatus.BAD_REQUEST),
+    INVALID_CART_DATA(4520, "Dữ liệu giỏ hàng không hợp lệ", HttpStatus.BAD_REQUEST),
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4601, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
     CATEGORY_TOO_LONG(4602, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
