@@ -125,4 +125,10 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         return productVariantRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
     }
+
+    @Override
+    public ProductVariantResponse getProductVariant(Long variantId) {
+        ProductVariant productVariant = getEntityProductVariant(variantId);
+        return productVariantMapper.toProductVariantResponse(productVariant);
+    }
 }

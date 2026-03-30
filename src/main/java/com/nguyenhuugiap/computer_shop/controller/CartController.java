@@ -42,11 +42,12 @@ public class CartController {
     }
 
     @GetMapping("/my-cart")
-    public ApiResponse<CartResponse> getMyCart(@CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false)
+    public ResponseEntity<ApiResponse<CartResponse>> getMyCart(@CookieValue(value = CookieUtils.CART_SESSION_COOKIE_NAME, required = false)
                                                String sessionId) {
-        return ApiResponse.<CartResponse>builder()
+        ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
                 .result(cartService.getCart(sessionId))
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/items/{productVariantId}/quantity")

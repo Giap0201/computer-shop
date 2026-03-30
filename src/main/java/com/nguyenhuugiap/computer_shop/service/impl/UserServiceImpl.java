@@ -65,7 +65,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @Override
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {

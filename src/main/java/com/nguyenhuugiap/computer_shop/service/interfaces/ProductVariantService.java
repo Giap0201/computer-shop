@@ -15,4 +15,5 @@ public interface ProductVariantService {
     ProductVariantResponse updateProductVariantByStatus(long id, ProductVariantUpdateStatusRequest status);
     ProductVariantResponse updateProductVariant(long id, ProductVariantUpdateRequest request);
     ProductVariant getEntityProductVariant(long id);
+    ProductVariantResponse getProductVariant(Long variantId);
 }

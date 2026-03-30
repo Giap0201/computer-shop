@@ -95,16 +95,13 @@ public enum ErrorCode {
 
     SHIPPING_NAME_REQUIRED(4510, "Tên người nhận không được để trống", HttpStatus.BAD_REQUEST),
     INVALID_SHIPPING_NAME(4511, "Tên người nhận không hợp lệ", HttpStatus.BAD_REQUEST),
-
     SHIPPING_PHONE_REQUIRED(4512, "Số điện thoại không được để trống", HttpStatus.BAD_REQUEST),
     INVALID_SHIPPING_PHONE(4513, "Số điện thoại không hợp lệ", HttpStatus.BAD_REQUEST),
-
     SHIPPING_ADDRESS_REQUIRED(4514, "Địa chỉ giao hàng không được để trống", HttpStatus.BAD_REQUEST),
-
     ITEMS_REQUIRED(4515, "Danh sách sản phẩm không được để trống", HttpStatus.BAD_REQUEST),
     INVALID_ITEMS(4516, "Danh sách sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
-
     PAYMENT_METHOD_REQUIRED(4517, "Phương thức thanh toán không được để trống", HttpStatus.BAD_REQUEST),
+    CANNOT_CREATE_ORDER_CODE(4518, "Không thể tạo mã đơn hàng", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // --- CATEGORY (45XX) ---
     CATEGORY_NAME_REQUIRED(4601, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
