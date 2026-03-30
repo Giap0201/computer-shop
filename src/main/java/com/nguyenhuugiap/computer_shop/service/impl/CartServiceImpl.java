@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -305,11 +306,21 @@ public class CartServiceImpl implements CartService {
         List<CartItemResponse> items = currentItems.stream()
                 .map(cartItem -> {
                     CartItemResponse response = cartItemMapper.toCartItemResponse(cartItem);
+                    // Convert attribute values to a readable string for storing in order items
+                    String variantAttributes = "";
+                    if (cartItem.getProductVariant().getAttributeValues() != null &&
+                            !cartItem.getProductVariant().getAttributeValues().isEmpty()) {
+                        variantAttributes = cartItem.getProductVariant().getAttributeValues().stream()
+                                .map(attVal -> attVal.getAttributeDefinition().getName() + ": "
+                                        + attVal.getValue())
+                                .collect(Collectors.joining(", "));
+                    }
                     BigDecimal price = response.getUnitPrice() != null
                             ? response.getUnitPrice()
                             : BigDecimal.ZERO;
                     BigDecimal quantity = BigDecimal.valueOf(cartItem.getQuantity());
                     response.setSubTotal(price.multiply(quantity));
+                    response.setAttributes(variantAttributes);
                     return response;
                 })
                 .toList();
