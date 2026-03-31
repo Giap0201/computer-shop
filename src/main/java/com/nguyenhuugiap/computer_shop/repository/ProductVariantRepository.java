@@ -25,6 +25,11 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     Long deductStock(@Param("variantId") Long variantId,
                     @Param("quantity") Long quantity);
 
+    @Modifying
+    @Query("UPDATE ProductVariant pv set pv.stockQuantity = pv.stockQuantity + :quantity " +
+            " where pv.id = :variantId")
+    Long addStock(@Param("variantId") Long variantId, @Param("quantity") Long quantity);
+
     @Query("SELECT pv FROM ProductVariant pv JOIN FETCH pv.product" +
             " join fetch pv.attributeValues av" +
             " left join fetch av.attributeDefinition" +

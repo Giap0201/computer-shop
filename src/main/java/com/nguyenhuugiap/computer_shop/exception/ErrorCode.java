@@ -104,7 +104,13 @@ public enum ErrorCode {
     CANNOT_CREATE_ORDER_CODE(4518, "Không thể tạo mã đơn hàng", HttpStatus.INTERNAL_SERVER_ERROR),
     CART_IS_EMPTY(4519, "Giỏ hàng trống", HttpStatus.BAD_REQUEST),
     INVALID_CART_DATA(4520, "Dữ liệu giỏ hàng không hợp lệ", HttpStatus.BAD_REQUEST),
-    // --- CATEGORY (45XX) ---
+    ORDER_NOT_FOUND(4521, "Không tìm thấy đơn hàng", HttpStatus.NOT_FOUND),
+    FAILED_TO_UPDATE_STOCK(4522, "Không thể cập nhật tồn kho sản phẩm", HttpStatus.INTERNAL_SERVER_ERROR),
+    ORDER_CANNOT_BE_CANCELLED(4523, "Đơn hàng không thể huỷ ở trạng thái hiện tại", HttpStatus.BAD_REQUEST),
+    ORDER_ALREADY_FINALIZED(4524, "Đơn hàng đã ở trạng thái kết thúc, không thể cập nhật", HttpStatus.BAD_REQUEST),
+    INVALID_STATUS_UPDATE_USE_CANCEL_API(4525, "Không thể cập nhật trạng thái sang CANCELLED. Vui lòng sử dụng API huỷ đơn hàng", HttpStatus.BAD_REQUEST),
+    STATUS_NOT_CHANGED(4526, "Trạng thái đơn hàng không thay đổi", HttpStatus.BAD_REQUEST),
+    // --- CATEGORY (46XX) ---
     CATEGORY_NAME_REQUIRED(4601, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
     CATEGORY_TOO_LONG(4602, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
     CATEGORY_EXISTS(4603, "Danh mục này đã tồn tại", HttpStatus.BAD_REQUEST),

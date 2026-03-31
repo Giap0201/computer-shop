@@ -1,8 +1,6 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
-import com.nguyenhuugiap.computer_shop.dto.order.OrderCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.order.OrderItemRequest;
-import com.nguyenhuugiap.computer_shop.dto.order.OrderResponse;
+import com.nguyenhuugiap.computer_shop.dto.order.*;
 import com.nguyenhuugiap.computer_shop.entity.*;
 import com.nguyenhuugiap.computer_shop.enums.OrderStatus;
 import com.nguyenhuugiap.computer_shop.enums.PaymentStatus;
@@ -100,11 +98,11 @@ public class OrderServiceImpl implements OrderService {
         User user = null;
         try {
             Long userId = Long.valueOf(username);
-            user = userRepository.getReferenceById(userId);
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         } catch (NumberFormatException e) {
             log.error("NumberFormatException", e);
         }
-        if (user == null) throw new AppException(ErrorCode.USER_NOT_FOUND);
         return user;
     }
 
@@ -182,14 +180,19 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public OrderResponse getOrderById(Long orderId) {
-        return null;
+        Order order = getOrderEntity(orderId);
+        return orderMapper.toResponse(order);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public OrderResponse getOrderByCode(String orderCode) {
-        return null;
+        Order order = orderRepository.findByOrderCode(orderCode).orElseThrow(() ->
+                new AppException(ErrorCode.ORDER_NOT_FOUND));
+        return orderMapper.toResponse(order);
     }
 
     @Override
@@ -197,14 +200,70 @@ public class OrderServiceImpl implements OrderService {
         return null;
     }
 
+    @Transactional
     @Override
-    public void cancelOrder(Long orderId, String reason) {
+    public void cancelOrderAsUser(Long orderId, CancelOrderRequest request) {
+        Order order = getOrderEntity(orderId);
 
+        User currentUser = getUser();
+        if (!currentUser.getId().equals(order.getUser().getId())) throw new AppException(ErrorCode.UNAUTHORIZED);
+
+        if (order.getStatus().equals(OrderStatus.PENDING)) processCancellation(order, request.getReason(), "User: ");
+        else throw new AppException(ErrorCode.ORDER_CANNOT_BE_CANCELLED);
     }
 
-    @Override
-    public void updateStatus(Long orderId, OrderStatus newStatus, String note) {
 
+    @Transactional
+    @Override
+    public void cancelOrderAsAdmin(Long orderId, CancelOrderRequest request) {
+        Order order = getOrderEntity(orderId);
+        if (order.getStatus().equals(OrderStatus.PENDING) || order.getStatus().equals(OrderStatus.CONFIRMED)
+                || order.getStatus().equals(OrderStatus.PROCESSING)) {
+            processCancellation(order, request.getReason(), "Admin: ");
+        } else throw new AppException(ErrorCode.ORDER_CANNOT_BE_CANCELLED);
+    }
+
+    private Order getOrderEntity(Long orderId) {
+        return orderRepository.findById(orderId).orElseThrow(
+                () -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
+    private void processCancellation(Order order, String reason, String prefix) {
+        order.setStatus(OrderStatus.CANCELLED);
+
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .status(OrderStatus.CANCELLED)
+                .note(prefix + " Lý do: " + reason).build();
+        order.addStatusHistory(history);
+
+        for (OrderItem item : order.getOrderItems()) {
+            Long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
+            if (updated == 0) throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
+        }
+        orderRepository.save(order);
+    }
+
+    @Transactional
+    @Override
+    public void updateStatus(Long orderId, UpdateOrderStatusRequest request) {
+        Order order = getOrderEntity(orderId);
+        if(order.getStatus().equals(OrderStatus.CANCELLED) || order.getStatus().equals(OrderStatus.RETURNED))
+            throw new AppException(ErrorCode.ORDER_ALREADY_FINALIZED);
+
+        if(order.getStatus().equals(request.getStatus()))
+            throw new AppException(ErrorCode.STATUS_NOT_CHANGED);
+
+        if(request.getStatus().equals(OrderStatus.CANCELLED))
+            throw new AppException(ErrorCode.INVALID_STATUS_UPDATE_USE_CANCEL_API);
+        order.setStatus(request.getStatus());
+
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .status(request.getStatus())
+                .note(request.getNote()).build();
+        order.addStatusHistory(history);
+
+        //Todo: Không cho phép nhảy từ PENDING thẳng lên DELIVERED)
+        orderRepository.save(order);
     }
 
     @Override
