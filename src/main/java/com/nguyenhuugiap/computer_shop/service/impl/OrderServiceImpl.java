@@ -226,6 +226,12 @@ public class OrderServiceImpl implements OrderService {
         return null;
     }
 
+    @Override
+    public Order getOrderEntityByCode(String orderCode) {
+        return orderRepository.findByOrderCode(orderCode).orElseThrow(() ->
+                new AppException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
 
     @Override
     public PageResponse<OrderResponse> getAllOrderAsAdmin(AdminOrderSearchRequest request, int page, int size) {
@@ -317,6 +323,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void handlePaymentCallback(String orderCode, boolean isSuccess) {
 
+    }
+
+    @Transactional
+    @Override
+    public void updatePaymentStatus(Long orderId, PaymentStatus paymentStatus) {
+        Order order = getOrderEntity(orderId);
+        order.setPaymentStatus(paymentStatus);
     }
 
 

@@ -45,6 +45,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/carts/**").permitAll()
                                 .requestMatchers(HttpMethod.PATCH, "carts/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "carts/**").permitAll()
+                                .requestMatchers("/payments/vnpay-return", "/payments/vnpay-ipn").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/files/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, CATEGORIES_PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().authenticated())

@@ -1,6 +1,5 @@
 package com.nguyenhuugiap.computer_shop.entity;
 
-
 import com.nguyenhuugiap.computer_shop.enums.PaymentMethod;
 import com.nguyenhuugiap.computer_shop.enums.TransactionStatus;
 import jakarta.persistence.*;
@@ -21,24 +20,31 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EntityListeners(AuditingEntityListener.class)
 public class PaymentTransaction extends BaseEntity {
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method")
+    @Column(name = "payment_method", nullable = false)
     PaymentMethod paymentMethod;
 
-    @Column(name = "transaction_code", unique = true)
-    String transactionCode; // Mã GD của VNPay. Null nếu là COD
+    // Mã hệ thống mình sinh ra (vnp_TxnRef). Ví dụ: ORD-123-1712345
+    @Column(name = "transaction_ref", unique = true, nullable = false)
+    String transactionRef;
 
+    // Mã VNPay trả về (vnp_TransactionNo). Null lúc tạo PENDING.
+    @Column(name = "transaction_code")
+    String transactionCode;
+
+    @Column(nullable = false)
     BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
     TransactionStatus status = TransactionStatus.PENDING;
 
-    @Column(name = "provider_response")
-    String providerResponse; // Lưu cục JSON phản hồi từ VNPay
+    // Dùng columnDefinition = "TEXT" để không bị lỗi tràn độ dài chuỗi
+    @Column(name = "provider_response", columnDefinition = "TEXT")
+    String providerResponse;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
     Order order;
-
 }

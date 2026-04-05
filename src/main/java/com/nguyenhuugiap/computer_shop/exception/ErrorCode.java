@@ -110,6 +110,9 @@ public enum ErrorCode {
     ORDER_ALREADY_FINALIZED(4524, "Đơn hàng đã ở trạng thái kết thúc, không thể cập nhật", HttpStatus.BAD_REQUEST),
     INVALID_STATUS_UPDATE_USE_CANCEL_API(4525, "Không thể cập nhật trạng thái sang CANCELLED. Vui lòng sử dụng API huỷ đơn hàng", HttpStatus.BAD_REQUEST),
     STATUS_NOT_CHANGED(4526, "Trạng thái đơn hàng không thay đổi", HttpStatus.BAD_REQUEST),
+    PENDING_TRANSACTION_NOT_FOUND(4527, "Không tìm thấy giao dịch đang chờ xử lý", HttpStatus.NOT_FOUND),
+    ORDER_ALREADY_PAID(4528, "Đơn hàng đã được thanh toán hoặc không thể xử lý lại", HttpStatus.BAD_REQUEST),
+
     // --- CATEGORY (46XX) ---
     CATEGORY_NAME_REQUIRED(4601, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
     CATEGORY_TOO_LONG(4602, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
