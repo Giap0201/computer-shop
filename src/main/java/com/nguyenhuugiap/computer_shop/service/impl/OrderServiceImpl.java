@@ -49,23 +49,30 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public OrderResponse createOrder(OrderCreationRequest request) {
-
+        // Get current authenticated user
         User user = getUser();
+
+        // Generate unique order code
         String orderCode = handlingOrderCode();
 
-        // Validate data cart
+        // Validate cart data if order is created from cart
         if (request.isFromCart()) {
             handlingCartItem(request.getItems());
         }
+
+        // Convert request items
         List<OrderItem> items = new ArrayList<>();
         if (request.getItems() != null) {
             items = handlingOrderItems(request.getItems());
         }
 
+        // Calculate total amount
         BigDecimal totalAmount = items.stream().map(item -> item.getPriceAtPurchase()
                 .multiply(BigDecimal.valueOf(item.getQuantity()))).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal finalAmount = totalAmount.add(SHIPPING_FEE);
+
+        // Build order entity
         Order order = Order.builder()
                 .orderCode(orderCode)
                 .totalAmount(totalAmount)
@@ -80,6 +87,8 @@ public class OrderServiceImpl implements OrderService {
                 .paymentStatus(PaymentStatus.UNPAID)
                 .user(user)
                 .build();
+
+        // Add items to order
         for (OrderItem item : items) order.addOrderItem(item);
 
         OrderStatusHistory history = OrderStatusHistory.builder()
@@ -88,12 +97,14 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         order.addStatusHistory(history);
 
+        // Remove item from cart after successful order creation
         if (request.isFromCart()) {
             List<Long> variantIds = request.getItems().stream()
                     .map(OrderItemRequest::getVariantId).toList();
             cartService.removeItems(null, variantIds);
         }
 
+        // Save order
         return orderMapper.toResponse(orderRepository.save(order));
     }
 
@@ -126,11 +137,14 @@ public class OrderServiceImpl implements OrderService {
     // Map order items request to order item entities
     private List<OrderItem> handlingOrderItems(List<OrderItemRequest> requests) {
         List<OrderItem> orderItems = new ArrayList<>();
+
+        // Extract all variantIds
         List<Long> variantIds = requests.stream().map(OrderItemRequest::getVariantId).toList();
 
-        // User JOIN FETCH to eagerly load product variants and avoid N+1 query problem
+        // Fetch all variants with product using JOIN FETCH (avoid N+1 problem)
         List<ProductVariant> productVariants = productVariantRepository.findVariantsWithProductByIds(variantIds);
 
+        // Map for quick lookup
         Map<Long, ProductVariant> variantMap = productVariants.stream()
                 .collect(Collectors.toMap(ProductVariant::getId, v -> v));
 
@@ -138,6 +152,7 @@ public class OrderServiceImpl implements OrderService {
             ProductVariant variant = variantMap.get(request.getVariantId());
             if (variant == null) throw new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND);
 
+            // Deduct stock using atomic update query (avoid race condition)
             Long updated = productVariantRepository.deductStock(variant.getId(), Long.valueOf(request.getQuantity()));
             if (updated == 0) throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
 
@@ -148,6 +163,8 @@ public class OrderServiceImpl implements OrderService {
                         .map(attVal -> attVal.getAttributeDefinition().getName() + ": " + attVal.getValue())
                         .collect(Collectors.joining(", "));
             }
+
+            // Create order item snapshot
             OrderItem orderItem = OrderItem.builder()
                     .productName(variant.getProduct().getName())
                     .skuCode(variant.getSkuCode())
@@ -177,9 +194,12 @@ public class OrderServiceImpl implements OrderService {
 
         for (OrderItemRequest reqItem : requests) {
             Integer quantityInCart = cartItemMap.get(reqItem.getVariantId());
+            // Validate item exists to cart
             if (quantityInCart == null) {
                 throw new AppException(ErrorCode.INVALID_CART_DATA);
             }
+
+            // Ensure FE data is not tampered (important security validation)
             if (!quantityInCart.equals(reqItem.getQuantity())) {
                 throw new AppException(ErrorCode.INVALID_CART_DATA);
             }
@@ -209,7 +229,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageResponse<OrderResponse> getAllOrderAsAdmin(AdminOrderSearchRequest request, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createAt").descending());
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Specification<Order> spec = OrderSpecification.getSearchSpec(request);
 
         Page<Order> orderPage = orderRepository.findAll(spec, pageable);
