@@ -1,8 +1,12 @@
 package com.nguyenhuugiap.computer_shop.controller.admin;
 
 import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.PageResponse;
+import com.nguyenhuugiap.computer_shop.dto.order.AdminOrderSearchRequest;
 import com.nguyenhuugiap.computer_shop.dto.order.CancelOrderRequest;
+import com.nguyenhuugiap.computer_shop.dto.order.OrderResponse;
 import com.nguyenhuugiap.computer_shop.dto.order.UpdateOrderStatusRequest;
+import com.nguyenhuugiap.computer_shop.entity.Order;
 import com.nguyenhuugiap.computer_shop.service.interfaces.OrderService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -35,5 +39,15 @@ public class AdminOrderController {
         orderService.cancelOrderAsAdmin(orderId, request);
         return ResponseEntity.ok(ApiResponse.<Void>builder().message("Huỷ đơn thành công!")
                 .build());
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getAllOrderAsAdmin(@ModelAttribute AdminOrderSearchRequest request,
+                                                                                 @RequestParam(defaultValue = "1") int page,
+                                                                                 @RequestParam(defaultValue = "10") int size) {
+        ApiResponse<PageResponse<OrderResponse>> response = ApiResponse.<PageResponse<OrderResponse>>builder()
+                .result(orderService.getAllOrderAsAdmin(request, page, size))
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

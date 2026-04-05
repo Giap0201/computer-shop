@@ -1,5 +1,6 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
+import com.nguyenhuugiap.computer_shop.dto.PageResponse;
 import com.nguyenhuugiap.computer_shop.dto.order.*;
 import com.nguyenhuugiap.computer_shop.entity.*;
 import com.nguyenhuugiap.computer_shop.enums.OrderStatus;
@@ -12,13 +13,17 @@ import com.nguyenhuugiap.computer_shop.repository.ProductVariantRepository;
 import com.nguyenhuugiap.computer_shop.repository.UserRepository;
 import com.nguyenhuugiap.computer_shop.service.interfaces.CartService;
 import com.nguyenhuugiap.computer_shop.service.interfaces.OrderService;
+import com.nguyenhuugiap.computer_shop.specification.OrderSpecification;
 import com.nguyenhuugiap.computer_shop.utils.OrderUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public OrderResponse createOrder(OrderCreationRequest request) {
+
         User user = getUser();
         String orderCode = handlingOrderCode();
 
@@ -196,9 +202,31 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderResponse> getMyOrders(Pageable pageable) {
+    public PageResponse<OrderResponse> getMyOrders(Pageable pageable) {
         return null;
     }
+
+
+    @Override
+    public PageResponse<OrderResponse> getAllOrderAsAdmin(AdminOrderSearchRequest request, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createAt").descending());
+        Specification<Order> spec = OrderSpecification.getSearchSpec(request);
+
+        Page<Order> orderPage = orderRepository.findAll(spec, pageable);
+
+        List<OrderResponse> content = orderPage.getContent().stream()
+                .map(orderMapper::toResponse)
+                .toList();
+
+        return PageResponse.<OrderResponse>builder()
+                .currentPage(page)
+                .pageSize(orderPage.getSize())
+                .totalPages(orderPage.getTotalPages())
+                .totalElements(orderPage.getTotalElements())
+                .data(content)
+                .build();
+    }
+
 
     @Transactional
     @Override
@@ -247,13 +275,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updateStatus(Long orderId, UpdateOrderStatusRequest request) {
         Order order = getOrderEntity(orderId);
-        if(order.getStatus().equals(OrderStatus.CANCELLED) || order.getStatus().equals(OrderStatus.RETURNED))
+        if (order.getStatus().equals(OrderStatus.CANCELLED) || order.getStatus().equals(OrderStatus.RETURNED))
             throw new AppException(ErrorCode.ORDER_ALREADY_FINALIZED);
 
-        if(order.getStatus().equals(request.getStatus()))
+        if (order.getStatus().equals(request.getStatus()))
             throw new AppException(ErrorCode.STATUS_NOT_CHANGED);
 
-        if(request.getStatus().equals(OrderStatus.CANCELLED))
+        if (request.getStatus().equals(OrderStatus.CANCELLED))
             throw new AppException(ErrorCode.INVALID_STATUS_UPDATE_USE_CANCEL_API);
         order.setStatus(request.getStatus());
 
@@ -270,4 +298,6 @@ public class OrderServiceImpl implements OrderService {
     public void handlePaymentCallback(String orderCode, boolean isSuccess) {
 
     }
+
+
 }
