@@ -53,14 +53,11 @@ public class PaymentService {
     @Value("${vnpay.api-url}")
     private String vnpApiUrl;
 
+    // Create VNPay payment URL for a given order
     public String createPaymentUrl(String orderCode, HttpServletRequest request) {
+        // Validate order state
         Order order = orderService.getOrderEntityByCode(orderCode);
-        if (order.getPaymentStatus() == PaymentStatus.PAID ||
-                order.getStatus() == OrderStatus.CONFIRMED ||
-                order.getStatus() == OrderStatus.COMPLETED) {
-            throw new AppException(ErrorCode.ORDER_ALREADY_PAID);
-        }
-
+        validateOrderForPayment(order);
 
         List<PaymentTransaction> oldPendingTxns = paymentTransactionRepository
                 .findByOrderIdAndStatus(order.getId(), TransactionStatus.PENDING);
@@ -144,6 +141,15 @@ public class PaymentService {
         return vnpPayUrl + "?" + queryUrl;
     }
 
+    // Validate if order eligible for payment
+    private void validateOrderForPayment(Order order) {
+        if (order.getPaymentStatus() == PaymentStatus.PAID ||
+                order.getStatus() == OrderStatus.CONFIRMED ||
+                order.getStatus() == OrderStatus.COMPLETED) {
+            throw new AppException(ErrorCode.ORDER_ALREADY_PAID);
+        }
+    }
+
     public Map<String, String> processIpn(HttpServletRequest request) {
         Map<String, String> response = new HashMap<>();
         try {
@@ -159,9 +165,6 @@ public class PaymentService {
 
             String vnp_SecureHash = request.getParameter("vnp_SecureHash");
 
-            // ====================================================
-            // 🔴 ĐOẠN CODE BỊ MẤT CẦN THÊM LẠI NGAY LẬP TỨC
-            // ====================================================
             fields.remove("vnp_SecureHashType");
             fields.remove("vnp_SecureHash");
             String signValue = VNPayConfig.hashAllFields(fields, secretKey);
