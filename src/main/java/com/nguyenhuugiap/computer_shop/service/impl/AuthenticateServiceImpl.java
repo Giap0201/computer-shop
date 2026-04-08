@@ -1,11 +1,12 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
-import com.nguyenhuugiap.computer_shop.dto.request.AuthenticateRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.IntrospectRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.LogoutRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.RefreshTokenRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.AuthenticateResponse;
-import com.nguyenhuugiap.computer_shop.dto.response.IntrospectResponse;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.AuthenticateRequest;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.IntrospectRequest;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.LogoutRequest;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.RefreshTokenRequest;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.AuthenticateResponse;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.IntrospectResponse;
+import com.nguyenhuugiap.computer_shop.dto.user.UserResponse;
 import com.nguyenhuugiap.computer_shop.entity.InvalidatedToken;
 import com.nguyenhuugiap.computer_shop.entity.User;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
@@ -24,8 +25,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
@@ -96,6 +99,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .token(accessToken)
                 .refreshToken(refreshToken)
                 .authenticated(true)
+                .userId(user.getId())
                 .build();
     }
 

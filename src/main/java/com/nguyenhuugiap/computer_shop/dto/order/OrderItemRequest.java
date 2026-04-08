@@ -1,0 +1,20 @@
+package com.nguyenhuugiap.computer_shop.dto.order;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class OrderItemRequest {
+    @NotNull(message = "QUANTITY_REQUIRED")
+    @Min(value = 1, message = "INVALID_QUANTITY")
+    Integer quantity;
+
+    @NotNull(message = "VARIANT_ID_REQUIRED")
+    Long variantId;
+}

@@ -1,6 +1,5 @@
 package com.nguyenhuugiap.computer_shop.repository;
 
-import com.nguyenhuugiap.computer_shop.dto.response.CategoryResponse;
 import com.nguyenhuugiap.computer_shop.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

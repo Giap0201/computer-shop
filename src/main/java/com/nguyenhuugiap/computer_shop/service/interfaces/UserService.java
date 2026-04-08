@@ -1,8 +1,8 @@
 package com.nguyenhuugiap.computer_shop.service.interfaces;
 
-import com.nguyenhuugiap.computer_shop.dto.request.UserCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.UserUpdateRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.UserResponse;
+import com.nguyenhuugiap.computer_shop.dto.user.UserCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.user.UserUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.user.UserResponse;
 
 import java.util.List;
 

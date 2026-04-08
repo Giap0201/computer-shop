@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,7 +29,8 @@ import java.util.List;
 public class SecurityConfig {
 
     String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/**"};
-    String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**"};
+    String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**", "/uploads/**"};
+    String[] PRODUCTS_PUBLIC_ENDPOINTS = {"/products/**", "/attributes/**"};
     JwtAuthenticationFilter jwtAuthenticationFilter;
     CustomAccessDeniedHandler customAccessDeniedHandler;
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -38,9 +40,18 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(auth ->
                         auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-//                                .requestMatchers(HttpMethod.GET, CATEGORIES_PUBLIC_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.GET, PRODUCTS_PUBLIC_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.POST, "/carts/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/carts/**").permitAll()
+                                .requestMatchers(HttpMethod.PATCH, "carts/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "carts/**").permitAll()
+                                .requestMatchers("/payments/vnpay-return", "/payments/vnpay-ipn").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/files/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, CATEGORIES_PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -1,6 +1,6 @@
 package com.nguyenhuugiap.computer_shop.exception;
 
-import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
