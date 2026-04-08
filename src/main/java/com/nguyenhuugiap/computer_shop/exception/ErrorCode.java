@@ -40,21 +40,88 @@ public enum ErrorCode {
     // --- ROLE (35XX) ---
     ROLE_NOT_FOUND(3501, "Vai trò (Role) không tồn tại", HttpStatus.NOT_FOUND),
 
-    // --- BRAND (4XXX) ---
+    // --- BRAND (40XX) ---
     BRAND_EXISTS(4001, "Thương hiệu này đã tồn tại", HttpStatus.BAD_REQUEST),
     BRAND_NAME_REQUIRED(4002, "Tên thương hiệu bắt buộc nhập", HttpStatus.BAD_REQUEST),
     BRAND_NAME_INVALID(4003, "Tên thương hiệu không hợp lệ", HttpStatus.BAD_REQUEST),
     BRAND_NOT_FOUND(4004, "Thương hiệu không tồn tại", HttpStatus.NOT_FOUND),
     BRAND_NAME_EXISTS(4005, "Tên thương hiệu đã được sử dụng", HttpStatus.BAD_REQUEST),
 
-    // --- CATEGORY (45XX) ---
-    CATEGORY_NAME_REQUIRED(4501, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
-    CATEGORY_TOO_LONG(4502, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
-    CATEGORY_EXISTS(4503, "Danh mục này đã tồn tại", HttpStatus.BAD_REQUEST),
-    CATEGORY_NOT_FOUND(4504, "Danh mục không tồn tại", HttpStatus.NOT_FOUND),
-    CANNOT_DELETE_HAS_CHILDREN(4505, "Không thể xoá danh mục đang chứa danh mục con", HttpStatus.BAD_REQUEST),
-    CANNOT_UPDATE_CATEGORY(4506, "Không thể cập nhật danh mục này", HttpStatus.BAD_REQUEST),
+    // --- PRODUCT (41XX)
+    PRODUCT_EXISTS(4100, "Sản phầm này đã tồn tại", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_REQUIRED(4101, "Tên sản phẩm bắt buộc nhập", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_INVALID(4102, "Tên sản phẩm không đúng định dạng", HttpStatus.BAD_REQUEST),
+    DESCRIPTION_INVALID(4103, "Mô tả không đúng định dạng", HttpStatus.BAD_REQUEST),
+    CATEGORY_REQUIRED(4104, "Danh mục không hợp lệ", HttpStatus.BAD_REQUEST),
+    BRAND_REQUIRED(4105, "Thương hiệu không hợp lệ", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_FOUND(4106, "Không tồn tại sản phẩm", HttpStatus.NOT_FOUND),
+
+    // --- PRODUCT_VARIANTS_ATTRIBUTES(42XX)
+    SKU_CODE_INVALID(4200, "Mã sku không hợp lệ", HttpStatus.BAD_REQUEST),
+    PRICE_REQUIRED(4201, "Giá không được bỏ trống", HttpStatus.BAD_REQUEST),
+    PRICE_INVALID(4202, "Giá tiền không hợp lệ", HttpStatus.BAD_REQUEST),
+    STOCK_REQUIRED(4203, "Tồn kho không được bỏ trống", HttpStatus.BAD_REQUEST),
+    STOCK_INVALID(4204, "Tồn kho không hợp lệ", HttpStatus.BAD_REQUEST),
+    NAME_ATTRIBUTE_REQUIRED(4205, "Tên thuộc tính không được bỏ trống", HttpStatus.BAD_REQUEST),
+    VALUE_ATTRIBUTE_REQUIRED(4206, "Giá trị thuộc tính không được bỏ trống", HttpStatus.BAD_REQUEST),
+    VARIANT_ATTRIBUTE_VALUE_REQUIRED(4207, "Danh sách thuộc tính không đuược bỏ trống", HttpStatus.BAD_REQUEST),
+    ATTRIBUTE_ID_REQUIRED(4208, "Vui lòng thêm tên thuộc tính", HttpStatus.BAD_REQUEST),
+    ATTRIBUTE_EXISTS(4209, "Thuộc tính đã tồn tại", HttpStatus.BAD_REQUEST),
+    ATTRIBUTE_NOT_FOUND(4210, "Thuộc tính không tồn tại", HttpStatus.NOT_FOUND),
+    ATTRIBUTE_IN_USE(4211, "Thuộc tính đang được sử dụng", HttpStatus.INTERNAL_SERVER_ERROR),
+    SKU_CODE_EXISTS(4212, "Mã sku code đã tồn tại", HttpStatus.INTERNAL_SERVER_ERROR),
+    PRODUCT_VARIANT_NOT_FOUND(4213, "Biến thể không tồn tại", HttpStatus.NOT_FOUND),
+    VERSION_MISMATCH(4214, "Dữ liệu đã bị thay đổi bởi người khác. Vui lòng tải lại.", HttpStatus.CONFLICT),
+    VERSION_REQUIRED(4215, "Version không được bỏ qua", HttpStatus.BAD_REQUEST),
+
+    // --- IMAGE(43XX)
+    IMAGE_REQUIRED(4300, "Vui lòng thêm ảnh", HttpStatus.BAD_REQUEST),
+    TOO_MANY_IMAGES(4301, "Không thể upload hơn 10 ảnh một lúc", HttpStatus.BAD_REQUEST),
+    IMAGE_NOT_FOUND(4302, "Ảnh không tồn tại", HttpStatus.NOT_FOUND),
+
+    // ---CART(44xx)
+    PRODUCT_VARIANT_REQUIRED(4401, "Vui lòng thêm 1 sản phẩm", HttpStatus.BAD_REQUEST),
+    QUANTITY_REQUIRED(4402, "Vui lòng thêm số lượng", HttpStatus.BAD_REQUEST),
+    QUANTITY_INVALID(4403, "Số lượng trong giỏ phải lớn hơn 0", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_STOCK(4404, "Số lượng yêu cầu vượt quá tồn kho", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_FOUND_IN_CART(4405, "Sản phẩm không tồn tại trong giỏ hàng", HttpStatus.NOT_FOUND),
+    CANNOT_REMOVE_PRODUCT_FROM_CART(4406, "Không thể xoá sản phẩm khỏi giỏ hàng", HttpStatus.BAD_REQUEST),
+
+    // --- ORDER(45XX) ---
+    INVALID_QUANTITY(4501, "Số lượng không hợp lệ", HttpStatus.BAD_REQUEST),
+    QUANTITY_PD_OR_REQUIRED(4502, "Số lượng không được để trống", HttpStatus.BAD_REQUEST),
+    VARIANT_ID_REQUIRED(4503, "Mã sản phẩm không được để trống", HttpStatus.BAD_REQUEST),
+    INVALID_VARIANT_ID(4504, "Mã sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
+
+    SHIPPING_NAME_REQUIRED(4510, "Tên người nhận không được để trống", HttpStatus.BAD_REQUEST),
+    INVALID_SHIPPING_NAME(4511, "Tên người nhận không hợp lệ", HttpStatus.BAD_REQUEST),
+    SHIPPING_PHONE_REQUIRED(4512, "Số điện thoại không được để trống", HttpStatus.BAD_REQUEST),
+    INVALID_SHIPPING_PHONE(4513, "Số điện thoại không hợp lệ", HttpStatus.BAD_REQUEST),
+    SHIPPING_ADDRESS_REQUIRED(4514, "Địa chỉ giao hàng không được để trống", HttpStatus.BAD_REQUEST),
+    ITEMS_REQUIRED(4515, "Danh sách sản phẩm không được để trống", HttpStatus.BAD_REQUEST),
+    INVALID_ITEMS(4516, "Danh sách sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
+    PAYMENT_METHOD_REQUIRED(4517, "Phương thức thanh toán không được để trống", HttpStatus.BAD_REQUEST),
+    CANNOT_CREATE_ORDER_CODE(4518, "Không thể tạo mã đơn hàng", HttpStatus.INTERNAL_SERVER_ERROR),
+    CART_IS_EMPTY(4519, "Giỏ hàng trống", HttpStatus.BAD_REQUEST),
+    INVALID_CART_DATA(4520, "Dữ liệu giỏ hàng không hợp lệ", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_FOUND(4521, "Không tìm thấy đơn hàng", HttpStatus.NOT_FOUND),
+    FAILED_TO_UPDATE_STOCK(4522, "Không thể cập nhật tồn kho sản phẩm", HttpStatus.INTERNAL_SERVER_ERROR),
+    ORDER_CANNOT_BE_CANCELLED(4523, "Đơn hàng không thể huỷ ở trạng thái hiện tại", HttpStatus.BAD_REQUEST),
+    ORDER_ALREADY_FINALIZED(4524, "Đơn hàng đã ở trạng thái kết thúc, không thể cập nhật", HttpStatus.BAD_REQUEST),
+    INVALID_STATUS_UPDATE_USE_CANCEL_API(4525, "Không thể cập nhật trạng thái sang CANCELLED. Vui lòng sử dụng API huỷ đơn hàng", HttpStatus.BAD_REQUEST),
+    STATUS_NOT_CHANGED(4526, "Trạng thái đơn hàng không thay đổi", HttpStatus.BAD_REQUEST),
+    PENDING_TRANSACTION_NOT_FOUND(4527, "Không tìm thấy giao dịch đang chờ xử lý", HttpStatus.NOT_FOUND),
+    ORDER_ALREADY_PAID(4528, "Đơn hàng đã được thanh toán hoặc không thể xử lý lại", HttpStatus.BAD_REQUEST),
+
+    // --- CATEGORY (46XX) ---
+    CATEGORY_NAME_REQUIRED(4601, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),
+    CATEGORY_TOO_LONG(4602, "Tên danh mục tối đa 100 kí tự", HttpStatus.BAD_REQUEST),
+    CATEGORY_EXISTS(4603, "Danh mục này đã tồn tại", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_FOUND(4604, "Danh mục không tồn tại", HttpStatus.NOT_FOUND),
+    CANNOT_DELETE_HAS_CHILDREN(4605, "Không thể xoá danh mục đang chứa danh mục con", HttpStatus.BAD_REQUEST),
+    CANNOT_UPDATE_CATEGORY(4606, "Không thể cập nhật danh mục này", HttpStatus.BAD_REQUEST),
     ;
+
 
     private int code;
     private String message;

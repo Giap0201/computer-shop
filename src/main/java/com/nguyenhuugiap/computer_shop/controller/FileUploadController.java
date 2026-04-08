@@ -1,8 +1,8 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
 import com.nguyenhuugiap.computer_shop.configuration.StorageProperties;
-import com.nguyenhuugiap.computer_shop.dto.response.ApiResponse;
-import com.nguyenhuugiap.computer_shop.dto.response.FileResponse;
+import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
+import com.nguyenhuugiap.computer_shop.dto.FileResponse;
 import com.nguyenhuugiap.computer_shop.service.interfaces.FileStorageService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

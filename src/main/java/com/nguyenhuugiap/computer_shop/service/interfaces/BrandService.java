@@ -1,8 +1,8 @@
 package com.nguyenhuugiap.computer_shop.service.interfaces;
 
-import com.nguyenhuugiap.computer_shop.dto.request.BrandCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.request.BrandUpdateRequest;
-import com.nguyenhuugiap.computer_shop.dto.response.BrandResponse;
+import com.nguyenhuugiap.computer_shop.dto.brand.BrandCreationRequest;
+import com.nguyenhuugiap.computer_shop.dto.brand.BrandUpdateRequest;
+import com.nguyenhuugiap.computer_shop.dto.brand.BrandResponse;
 
 import java.util.List;
 
