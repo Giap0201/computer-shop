@@ -35,9 +35,13 @@ import java.util.*;
 @Transactional
 @Log4j2
 public class PaymentService {
+    // Order service to handle business to logic related to order
     private final OrderService orderService;
+
+    // Repository for PaymentTransaction entity
     private final PaymentTransactionRepository paymentTransactionRepository;
 
+    // VNPay merchant code
     @Value("${vnpay.tmn-code}")
     private String vnpTmnCode;
 
