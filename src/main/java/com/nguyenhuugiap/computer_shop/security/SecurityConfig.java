@@ -31,6 +31,7 @@ public class SecurityConfig {
     String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/**"};
     String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**", "/uploads/**"};
     String[] PRODUCTS_PUBLIC_ENDPOINTS = {"/products/**", "/attributes/**"};
+
     JwtAuthenticationFilter jwtAuthenticationFilter;
     CustomAccessDeniedHandler customAccessDeniedHandler;
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -39,15 +40,32 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(auth ->
                         auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                // Swagger
+                                .requestMatchers(
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**",
+                                        "/v3/api-docs",
+                                        "/webjars/**"
+                                ).permitAll()
+
+                                // Public Endpoints
                                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                                 .requestMatchers(HttpMethod.GET, PRODUCTS_PUBLIC_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.GET, CATEGORIES_PUBLIC_ENDPOINTS).permitAll()
+
+                                // Cart Endpoints (Đã sửa thêm dấu /)
                                 .requestMatchers(HttpMethod.POST, "/carts/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/carts/**").permitAll()
-                                .requestMatchers(HttpMethod.PATCH, "carts/**").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "carts/**").permitAll()
+                                .requestMatchers(HttpMethod.PATCH, "/carts/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/carts/**").permitAll()
+
+                                // Payment callbacks
                                 .requestMatchers("/payments/vnpay-return", "/payments/vnpay-ipn").permitAll()
+
+                                // Admin paths
                                 .requestMatchers(HttpMethod.POST, "/files/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, CATEGORIES_PUBLIC_ENDPOINTS).permitAll()
+
                                 .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
@@ -58,15 +76,22 @@ public class SecurityConfig {
         httpSecurity.exceptionHandling(exceptionHandler -> exceptionHandler
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(customAccessDeniedHandler));
+
         return httpSecurity.build();
     }
 
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3002"));
+
+        // Cho phép tất cả các header và method
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
+
+        // QUAN TRỌNG: Phải có dòng này thì Frontend mới gửi được Cookie CART_SESSION_ID lên
+        configuration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
