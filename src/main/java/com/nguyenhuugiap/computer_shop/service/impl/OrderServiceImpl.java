@@ -4,6 +4,7 @@ import com.nguyenhuugiap.computer_shop.dto.PageResponse;
 import com.nguyenhuugiap.computer_shop.dto.order.*;
 import com.nguyenhuugiap.computer_shop.entity.*;
 import com.nguyenhuugiap.computer_shop.enums.OrderStatus;
+import com.nguyenhuugiap.computer_shop.enums.PaymentMethod;
 import com.nguyenhuugiap.computer_shop.enums.PaymentStatus;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
@@ -26,9 +27,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -330,6 +333,33 @@ public class OrderServiceImpl implements OrderService {
     public void updatePaymentStatus(Long orderId, PaymentStatus paymentStatus) {
         Order order = getOrderEntity(orderId);
         order.setPaymentStatus(paymentStatus);
+    }
+
+
+    // Dung requires new de moi don hang la mot transaction doc lap
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void cancelOrderSystem(Order order) {
+        if(order.getStatus() != OrderStatus.PENDING) return;
+        if(order.getPaymentMethod() == PaymentMethod.COD) return;
+        if(order.getPaymentStatus() != PaymentStatus.UNPAID) return;
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setPaymentStatus(PaymentStatus.EXPIRED);
+
+        // roll back stock
+        for (OrderItem item : order.getOrderItems()){
+            long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
+            if(updated == 0){
+                throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
+            }
+        }
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .order(order)
+                .status(OrderStatus.CANCELLED)
+                .note("System: Tự động hủy đơn do quá hạn thanh toán VNPay")
+                .build();
+        order.addStatusHistory(history);
+        orderRepository.save(order);
     }
 
 

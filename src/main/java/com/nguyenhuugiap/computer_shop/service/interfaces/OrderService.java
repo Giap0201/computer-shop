@@ -6,6 +6,8 @@ import com.nguyenhuugiap.computer_shop.entity.Order;
 import com.nguyenhuugiap.computer_shop.enums.PaymentStatus;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
+
 public interface OrderService {
     // Luồng chính
     OrderResponse createOrder(OrderCreationRequest request);
@@ -24,4 +26,6 @@ public interface OrderService {
     void handlePaymentCallback(String orderCode, boolean isSuccess);
 
     void updatePaymentStatus(Long orderId, PaymentStatus paymentStatus);
+
+    void cancelOrderSystem(Order order);
 }
