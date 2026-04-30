@@ -8,6 +8,7 @@ import com.nguyenhuugiap.computer_shop.enums.OrderStatus;
 import com.nguyenhuugiap.computer_shop.enums.PaymentMethod;
 import com.nguyenhuugiap.computer_shop.enums.PaymentStatus;
 import com.nguyenhuugiap.computer_shop.enums.TransactionStatus;
+import com.nguyenhuugiap.computer_shop.event.PaymentSuccessEvent;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.repository.PaymentTransactionRepository;
@@ -16,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -41,6 +43,8 @@ public class PaymentService {
 
     // Repository for PaymentTransaction entity
     private final PaymentTransactionRepository paymentTransactionRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     // VNPay merchant code
     @Value("${vnpay.tmn-code}")
@@ -250,6 +254,9 @@ public class PaymentService {
                 .build();
         order.addStatusHistory(history);
 
+        // 3. Emit Event to decouple Business Logic.
+        log.info("Publishing PaymentSuccessEvent for Order ID: {}", order.getId());
+        eventPublisher.publishEvent(new PaymentSuccessEvent(this, order.getId()));
     }
 
     public String processReturn(HttpServletRequest request) {

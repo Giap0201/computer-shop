@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -107,8 +106,12 @@ public class OrderServiceImpl implements OrderService {
             cartService.removeItems(null, variantIds);
         }
 
+        Order savedOrder = orderRepository.save(order);
+        if (savedOrder.getPaymentMethod() == PaymentMethod.COD) {
+            tryAutoConfirm(savedOrder.getId());
+        }
         // Save order
-        return orderMapper.toResponse(orderRepository.save(order));
+        return orderMapper.toResponse(savedOrder);
     }
 
     private User getUser() {
@@ -339,7 +342,8 @@ public class OrderServiceImpl implements OrderService {
     // Dung requires new de moi don hang la mot transaction doc lap
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public void cancelOrderSystem(Order order) {
+    public void cancelOrderSystem(Long orderId) {
+        Order order = getOrderEntity(orderId);
         if(order.getStatus() != OrderStatus.PENDING) return;
         if(order.getPaymentMethod() == PaymentMethod.COD) return;
         if(order.getPaymentStatus() != PaymentStatus.UNPAID) return;
@@ -362,5 +366,40 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void tryAutoConfirm(Long orderId) {
+        Order order = getOrderEntity(orderId);
+        if (order.getStatus() != OrderStatus.PENDING) {
+            log.info("Order {} is not PENDING. Skip auto-confirm.", order.getOrderCode());
+            return;
+        }
+
+        if (!order.isValidTransition(OrderStatus.CONFIRMED)) {
+            log.warn("Invalid state transition for Order {}.", order.getOrderCode());
+            return;
+        }
+
+        // Domain Business Check: Does it meet the criteria?
+        if (!order.canAutoConfirm()) {
+            log.info("Order {} does not meet auto-confirm conditions.", order.getOrderCode());
+            return;
+        }
+
+        // Execute the confirmation logic.
+        confirmOrder(order);
+    }
+
+    private void confirmOrder(Order order) {
+        order.setStatus(OrderStatus.CONFIRMED);
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .status(OrderStatus.CONFIRMED)
+                .note("System: Đơn hàng tự động xác nhận (Auto-Confirmed) đủ điều kiện hợp lệ.")
+                .build();
+        order.addStatusHistory(history);
+        // Save entity. Optimistic lock (@Version) will throw exception if race condition occurs.
+        orderRepository.save(order);
+        log.info("Successfully auto-confirmed Order: {}", order.getOrderCode());
+    }
 
 }
