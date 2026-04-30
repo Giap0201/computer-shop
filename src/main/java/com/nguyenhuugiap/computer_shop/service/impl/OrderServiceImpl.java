@@ -4,6 +4,7 @@ import com.nguyenhuugiap.computer_shop.dto.PageResponse;
 import com.nguyenhuugiap.computer_shop.dto.order.*;
 import com.nguyenhuugiap.computer_shop.entity.*;
 import com.nguyenhuugiap.computer_shop.enums.OrderStatus;
+import com.nguyenhuugiap.computer_shop.enums.PaymentMethod;
 import com.nguyenhuugiap.computer_shop.enums.PaymentStatus;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -104,8 +106,12 @@ public class OrderServiceImpl implements OrderService {
             cartService.removeItems(null, variantIds);
         }
 
+        Order savedOrder = orderRepository.save(order);
+        if (savedOrder.getPaymentMethod() == PaymentMethod.COD) {
+            tryAutoConfirm(savedOrder.getId());
+        }
         // Save order
-        return orderMapper.toResponse(orderRepository.save(order));
+        return orderMapper.toResponse(savedOrder);
     }
 
     private User getUser() {
@@ -332,5 +338,68 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentStatus(paymentStatus);
     }
 
+
+    // Dung requires new de moi don hang la mot transaction doc lap
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void cancelOrderSystem(Long orderId) {
+        Order order = getOrderEntity(orderId);
+        if(order.getStatus() != OrderStatus.PENDING) return;
+        if(order.getPaymentMethod() == PaymentMethod.COD) return;
+        if(order.getPaymentStatus() != PaymentStatus.UNPAID) return;
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setPaymentStatus(PaymentStatus.EXPIRED);
+
+        // roll back stock
+        for (OrderItem item : order.getOrderItems()){
+            long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
+            if(updated == 0){
+                throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
+            }
+        }
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .order(order)
+                .status(OrderStatus.CANCELLED)
+                .note("System: Tự động hủy đơn do quá hạn thanh toán VNPay")
+                .build();
+        order.addStatusHistory(history);
+        orderRepository.save(order);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void tryAutoConfirm(Long orderId) {
+        Order order = getOrderEntity(orderId);
+        if (order.getStatus() != OrderStatus.PENDING) {
+            log.info("Order {} is not PENDING. Skip auto-confirm.", order.getOrderCode());
+            return;
+        }
+
+        if (!order.isValidTransition(OrderStatus.CONFIRMED)) {
+            log.warn("Invalid state transition for Order {}.", order.getOrderCode());
+            return;
+        }
+
+        // Domain Business Check: Does it meet the criteria?
+        if (!order.canAutoConfirm()) {
+            log.info("Order {} does not meet auto-confirm conditions.", order.getOrderCode());
+            return;
+        }
+
+        // Execute the confirmation logic.
+        confirmOrder(order);
+    }
+
+    private void confirmOrder(Order order) {
+        order.setStatus(OrderStatus.CONFIRMED);
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .status(OrderStatus.CONFIRMED)
+                .note("System: Đơn hàng tự động xác nhận (Auto-Confirmed) đủ điều kiện hợp lệ.")
+                .build();
+        order.addStatusHistory(history);
+        // Save entity. Optimistic lock (@Version) will throw exception if race condition occurs.
+        orderRepository.save(order);
+        log.info("Successfully auto-confirmed Order: {}", order.getOrderCode());
+    }
 
 }

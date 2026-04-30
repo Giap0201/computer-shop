@@ -1,13 +1,14 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
 import com.nguyenhuugiap.computer_shop.configuration.VNPayConfig;
-import com.nguyenhuugiap.computer_shop.dto.order.UpdateOrderStatusRequest;
 import com.nguyenhuugiap.computer_shop.entity.Order;
+import com.nguyenhuugiap.computer_shop.entity.OrderStatusHistory;
 import com.nguyenhuugiap.computer_shop.entity.PaymentTransaction;
 import com.nguyenhuugiap.computer_shop.enums.OrderStatus;
 import com.nguyenhuugiap.computer_shop.enums.PaymentMethod;
 import com.nguyenhuugiap.computer_shop.enums.PaymentStatus;
 import com.nguyenhuugiap.computer_shop.enums.TransactionStatus;
+import com.nguyenhuugiap.computer_shop.event.PaymentSuccessEvent;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.repository.PaymentTransactionRepository;
@@ -16,12 +17,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
@@ -40,6 +43,8 @@ public class PaymentService {
 
     // Repository for PaymentTransaction entity
     private final PaymentTransactionRepository paymentTransactionRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     // VNPay merchant code
     @Value("${vnpay.tmn-code}")
@@ -63,16 +68,12 @@ public class PaymentService {
         Order order = orderService.getOrderEntityByCode(orderCode);
         validateOrderForPayment(order);
 
-        List<PaymentTransaction> oldPendingTxns = paymentTransactionRepository
-                .findByOrderIdAndStatus(order.getId(), TransactionStatus.PENDING);
+        // Cancel all order has payment status pending old
+        paymentTransactionRepository.expireOldPendingTransactions(order.getId());
 
-        for (PaymentTransaction oldTxn : oldPendingTxns) {
-            oldTxn.setStatus(TransactionStatus.EXPIRED);
-            paymentTransactionRepository.save(oldTxn);
-        }
-
-
-        String vnp_TxnRef = order.getOrderCode() + "-" + System.currentTimeMillis() % 100000;
+        // Create code tnxRef
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String vnp_TxnRef = order.getOrderCode() + "-" + uniqueSuffix;
         PaymentTransaction transaction = PaymentTransaction.builder()
                 .paymentMethod(PaymentMethod.VNPAY)
                 .transactionRef(vnp_TxnRef)
@@ -82,6 +83,10 @@ public class PaymentService {
                 .build();
         paymentTransactionRepository.save(transaction);
 
+        return buildVNPayUrl(order, vnp_TxnRef, request);
+    }
+
+    private String buildVNPayUrl(Order order, String vnp_TxnRef, HttpServletRequest request) {
         long amount = order.getFinalAmount().longValue() * 100L;
         String vnp_IpAddr = VNPayConfig.getIpAddress(request);
 
@@ -141,7 +146,6 @@ public class PaymentService {
         String queryUrl = query.toString();
         String vnp_SecureHash = VNPayConfig.hmacSHA512(secretKey, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
-
         return vnpPayUrl + "?" + queryUrl;
     }
 
@@ -182,7 +186,7 @@ public class PaymentService {
             String vnpAmount = request.getParameter("vnp_Amount");
 
             // 1. TÌM GIAO DỊCH BẰNG VNP_TXNREF
-            PaymentTransaction transaction = paymentTransactionRepository.findByTransactionRef(vnpTxnRef)
+            PaymentTransaction transaction = paymentTransactionRepository.findByTransactionRefForUpdate(vnpTxnRef)
                     .orElse(null);
 
             if (transaction == null) {
@@ -190,11 +194,9 @@ public class PaymentService {
                 response.put("Message", "Order not found");
                 return response;
             }
-
-            // 2. Lấy Order từ Transaction ra
             Order order = transaction.getOrder();
 
-            // 3. Kiểm tra số tiền
+            // Check money valid
             long expectedAmount = transaction.getAmount().longValue() * 100L;
             if (expectedAmount != Long.parseLong(vnpAmount)) {
                 response.put("RspCode", "04");
@@ -236,6 +238,8 @@ public class PaymentService {
 
         } catch (Exception e) {
             log.error("IPN Process Error: ", e);
+            // Spring rollback when error
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             response.put("RspCode", "99");
             response.put("Message", "Unknown error");
             return response;
@@ -243,13 +247,16 @@ public class PaymentService {
     }
 
     private void processOrderStatusConfirm(Order order) {
-        UpdateOrderStatusRequest request = UpdateOrderStatusRequest.builder()
-                .status(OrderStatus.CONFIRMED)
-                .note("System: Khách hàng đã thanh toán thành công qua VNPAY")
-                .build();
-
-        orderService.updateStatus(order.getId(), request);
         orderService.updatePaymentStatus(order.getId(), PaymentStatus.PAID);
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .status(order.getStatus())
+                .note("System: Nhận thanh toán thành công qua VNPAY. Chờ xác nhận đơn hàng.")
+                .build();
+        order.addStatusHistory(history);
+
+        // 3. Emit Event to decouple Business Logic.
+        log.info("Publishing PaymentSuccessEvent for Order ID: {}", order.getId());
+        eventPublisher.publishEvent(new PaymentSuccessEvent(this, order.getId()));
     }
 
     public String processReturn(HttpServletRequest request) {
@@ -371,8 +378,8 @@ public class PaymentService {
     public Map<String, String> verifyPaymentStatusImmediately(String orderCode) {
         Order order = orderService.getOrderEntityByCode(orderCode);
 
-        if (order.getStatus() == OrderStatus.CONFIRMED && order.getPaymentStatus() == PaymentStatus.PAID) {
-            return Map.of("status", "SUCCESS", "message", "Thanh toán thành công");
+        if (order.getPaymentStatus() == PaymentStatus.PAID) {
+            return Map.of("status", "SUCCESS", "message", "Thanh toán thành công. Đơn hàng đang chờ xử lý.");
         }
 
         if (order.getStatus() == OrderStatus.PENDING) {

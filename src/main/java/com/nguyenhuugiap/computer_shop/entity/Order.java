@@ -96,6 +96,30 @@ public class Order extends BaseEntity {
     @ToString.Exclude
     List<PaymentTransaction> paymentTransactions = new ArrayList<>();
 
+    // Required to Optimistic Locking to prevent race conditions
+    @Version
+    Long version;
+
+    public boolean canAutoConfirm(){
+        if(this.status != OrderStatus.PENDING) return false;
+
+        // Auto confirm if COD or if online payment is fully paid
+        return this.paymentMethod == PaymentMethod.COD ||
+                this.paymentStatus == PaymentStatus.PAID;
+    }
+
+    // Verify if state transition is valid to prevent logic flow errors.
+    public boolean isValidTransition(OrderStatus newStatus) {
+        if (this.status == OrderStatus.CANCELLED || this.status == OrderStatus.RETURNED) {
+            return false; // Cannot change state of finalized orders
+        }
+        if (this.status == OrderStatus.PENDING && newStatus == OrderStatus.CONFIRMED) {
+            return true; // Valid path
+        }
+        return false;
+    }
+
+
     // Helper methods cho Status History
     public void addStatusHistory(OrderStatusHistory history) {
         if (statusHistories == null) statusHistories = new ArrayList<>();
