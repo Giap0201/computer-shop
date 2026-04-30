@@ -18,4 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     @Query("SELECT o FROM Order o WHERE o.status = 'PENDING' AND o.paymentStatus = 'UNPAID' AND o.paymentMethod = 'VNPAY' AND o.createdAt <= :timeoutThreshold")
     List<Order> findExpiredOrders(@Param("timeoutThreshold") LocalDateTime timeoutThreshold);
+
+    @Query("SELECT o FROM Order o JOIN FETCH o.user WHERE o.id = :id")
+    Optional<Order> findByIdWithUser(@Param("id") Long id);
 }
