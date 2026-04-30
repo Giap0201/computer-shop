@@ -4,6 +4,7 @@ import com.nguyenhuugiap.computer_shop.event.PaymentSuccessEvent;
 import com.nguyenhuugiap.computer_shop.service.interfaces.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -16,6 +17,7 @@ public class OrderEventListener {
     private final OrderService orderService;
 
     // Use TransactionalEventListener to ensure this only runs AFTER the IPN transaction is successfully committed to DB.
+    @Async("taskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentSuccessEvent(PaymentSuccessEvent event) {
         Long orderId = event.getOrderId();
