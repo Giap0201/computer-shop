@@ -6,6 +6,7 @@ import com.nguyenhuugiap.computer_shop.entity.*;
 import com.nguyenhuugiap.computer_shop.enums.OrderStatus;
 import com.nguyenhuugiap.computer_shop.enums.PaymentMethod;
 import com.nguyenhuugiap.computer_shop.enums.PaymentStatus;
+import com.nguyenhuugiap.computer_shop.event.OrderPlaceEvent;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.mapper.OrderMapper;
@@ -20,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
     ProductVariantRepository productVariantRepository;
     CartService cartService;
     final BigDecimal SHIPPING_FEE = new BigDecimal(10000);
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override
@@ -110,7 +113,8 @@ public class OrderServiceImpl implements OrderService {
         if (savedOrder.getPaymentMethod() == PaymentMethod.COD) {
             tryAutoConfirm(savedOrder.getId());
         }
-        // Save order
+        //Event cod
+        eventPublisher.publishEvent(new OrderPlaceEvent(this, savedOrder.getId()));
         return orderMapper.toResponse(savedOrder);
     }
 
@@ -344,16 +348,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void cancelOrderSystem(Long orderId) {
         Order order = getOrderEntity(orderId);
-        if(order.getStatus() != OrderStatus.PENDING) return;
-        if(order.getPaymentMethod() == PaymentMethod.COD) return;
-        if(order.getPaymentStatus() != PaymentStatus.UNPAID) return;
+        if (order.getStatus() != OrderStatus.PENDING) return;
+        if (order.getPaymentMethod() == PaymentMethod.COD) return;
+        if (order.getPaymentStatus() != PaymentStatus.UNPAID) return;
         order.setStatus(OrderStatus.CANCELLED);
         order.setPaymentStatus(PaymentStatus.EXPIRED);
 
         // roll back stock
-        for (OrderItem item : order.getOrderItems()){
+        for (OrderItem item : order.getOrderItems()) {
             long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
-            if(updated == 0){
+            if (updated == 0) {
                 throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
             }
         }

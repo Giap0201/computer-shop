@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.listener;
 
 import com.nguyenhuugiap.computer_shop.entity.Order;
+import com.nguyenhuugiap.computer_shop.event.OrderPlaceEvent;
 import com.nguyenhuugiap.computer_shop.event.PaymentSuccessEvent;
 import com.nguyenhuugiap.computer_shop.repository.OrderRepository;
 import com.nguyenhuugiap.computer_shop.service.impl.EmailService;
@@ -37,6 +38,22 @@ public class EmailEventListener {
                 emailService.sendOrderConfirmation(customerEmail, order.getOrderCode());
             }
         } catch (Exception e) {
+            log.error("LỖI CRITICAL: Gửi email thất bại cho đơn {}. Nguyên nhân: {}", orderId, e.getMessage());
+        }
+    }
+
+    @Async("taskExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleOrderPlacedForEmail(OrderPlaceEvent event){
+        Long orderId = event.getOrderId();
+        try {
+            Order order = orderRepository.findByIdWithUser(orderId).orElse(null);
+
+            if (order != null && order.getUser() != null) {
+                String customerEmail = order.getUser().getEmail();
+                emailService.sendCodOrderConfirmation(customerEmail, order.getOrderCode());
+            }
+        }catch (Exception e){
             log.error("LỖI CRITICAL: Gửi email thất bại cho đơn {}. Nguyên nhân: {}", orderId, e.getMessage());
         }
     }
