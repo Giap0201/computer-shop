@@ -112,6 +112,9 @@ public enum ErrorCode {
     STATUS_NOT_CHANGED(4526, "Trạng thái đơn hàng không thay đổi", HttpStatus.BAD_REQUEST),
     PENDING_TRANSACTION_NOT_FOUND(4527, "Không tìm thấy giao dịch đang chờ xử lý", HttpStatus.NOT_FOUND),
     ORDER_ALREADY_PAID(4528, "Đơn hàng đã được thanh toán hoặc không thể xử lý lại", HttpStatus.BAD_REQUEST),
+    CANNOT_CANCEL_ORDER(4529, "Chỉ có thể huỷ đơn hàng khi đang ở trạng thái PENDING hoặc CONFIRMED", HttpStatus.BAD_REQUEST),
+    INVALID_STATUS_TRANSITION(4530, "Luồng chuyển đổi trạng thái không hợp lệ (Nhảy cóc hoặc lùi trạng thái)", HttpStatus.BAD_REQUEST),
+    CONCURRENT_UPDATE_DETECTED(4531, "Đơn hàng vừa được cập nhật bởi một người khác. Vui lòng tải lại trang để xem dữ liệu mới nhất", HttpStatus.CONFLICT),
 
     // --- CATEGORY (46XX) ---
     CATEGORY_NAME_REQUIRED(4601, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

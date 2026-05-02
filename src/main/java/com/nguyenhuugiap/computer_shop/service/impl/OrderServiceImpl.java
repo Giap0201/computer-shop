@@ -299,11 +299,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(OrderStatus.CANCELLED)
                 .note(prefix + " Lý do: " + reason).build();
         order.addStatusHistory(history);
-
-        for (OrderItem item : order.getOrderItems()) {
-            Long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
-            if (updated == 0) throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
-        }
+        restoreInventory(order.getOrderItems());
         orderRepository.save(order);
     }
 
@@ -311,6 +307,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updateStatus(Long orderId, UpdateOrderStatusRequest request) {
         Order order = getOrderEntity(orderId);
+        OrderStatus newStatus = request.getStatus();
+
         if (order.getStatus().equals(OrderStatus.CANCELLED) || order.getStatus().equals(OrderStatus.RETURNED))
             throw new AppException(ErrorCode.ORDER_ALREADY_FINALIZED);
 
@@ -319,6 +317,19 @@ public class OrderServiceImpl implements OrderService {
 
         if (request.getStatus().equals(OrderStatus.CANCELLED))
             throw new AppException(ErrorCode.INVALID_STATUS_UPDATE_USE_CANCEL_API);
+
+        if (!isValidStatusTransition(order.getStatus(), request.getStatus()))
+            throw new AppException(ErrorCode.INVALID_STATUS_TRANSITION);
+
+        if (newStatus.equals(OrderStatus.DELIVERED)) {
+            if (order.getPaymentMethod() == PaymentMethod.COD)
+                order.setPaymentStatus(PaymentStatus.PAID);
+        } else if (newStatus.equals(OrderStatus.RETURNED)) {
+            restoreInventory(order.getOrderItems());
+            if (order.getPaymentMethod() == PaymentMethod.VNPAY && order.getPaymentStatus() == PaymentStatus.PAID) {
+                order.setPaymentStatus(PaymentStatus.REFUNDED);
+            }
+        }
         order.setStatus(request.getStatus());
 
         OrderStatusHistory history = OrderStatusHistory.builder()
@@ -326,13 +337,19 @@ public class OrderServiceImpl implements OrderService {
                 .note(request.getNote()).build();
         order.addStatusHistory(history);
 
-        //Todo: Không cho phép nhảy từ PENDING thẳng lên DELIVERED)
         orderRepository.save(order);
     }
 
     @Override
     public void handlePaymentCallback(String orderCode, boolean isSuccess) {
 
+    }
+
+    private void restoreInventory(List<OrderItem> orderItems) {
+        for (OrderItem item : orderItems) {
+            Long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
+            if (updated == 0) throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
+        }
     }
 
     @Transactional
@@ -404,6 +421,17 @@ public class OrderServiceImpl implements OrderService {
         // Save entity. Optimistic lock (@Version) will throw exception if race condition occurs.
         orderRepository.save(order);
         log.info("Successfully auto-confirmed Order: {}", order.getOrderCode());
+    }
+
+    private boolean isValidStatusTransition(OrderStatus current, OrderStatus next) {
+        return switch (current) {
+            case PENDING -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
+            case CONFIRMED -> next == OrderStatus.PROCESSING || next == OrderStatus.CANCELLED;
+            case PROCESSING -> next == OrderStatus.SHIPPING || next == OrderStatus.CANCELLED;
+            case SHIPPING -> next == OrderStatus.DELIVERED || next == OrderStatus.RETURNED;
+            case DELIVERED -> next == OrderStatus.COMPLETED || next == OrderStatus.RETURNED;
+            default -> false;
+        };
     }
 
 }
