@@ -73,38 +73,135 @@ Dự án được xây dựng bằng **Spring Boot** theo kiến trúc phân l�
 - Quản lý sản phẩm, danh mục, thương hiệu.
 - Quản lý đơn hàng và cập nhật trạng thái xử lý.
 
-## Một số điểm kỹ thuật nổi bật
+## Điểm kỹ thuật nổi bật
 
-### Xác thực và bảo mật
+### 1. Hệ thống xác thực đa tầng
 
-Hệ thống sử dụng JWT cho các API cần xác thực, kết hợp Access Token và Refresh Token. Refresh Token được xoay vòng khi làm mới phiên đăng nhập. Token bị thu hồi được lưu trong Redis với thời gian sống tương ứng thời hạn còn lại của token.
+Hệ thống hỗ trợ hai phương thức đăng nhập độc lập nhưng cùng đầu ra là JWT của hệ thống:
 
-### Cache bằng Redis
+- **Email / Mật khẩu** — xác thực thủ công bằng `Nimbus JOSE-JWT` (thuật toán HS512)
+- **Google OAuth2** — Authorization Code Flow thông qua `Spring Security OAuth2 Client`
 
-Redis được sử dụng để giảm số lần truy vấn dữ liệu ít thay đổi hoặc được truy cập thường xuyên như sản phẩm, danh mục và thương hiệu. Cache được xóa hoặc cập nhật lại khi dữ liệu liên quan thay đổi.
+Sau khi Google trả về thông tin người dùng, hệ thống tự tạo JWT của riêng mình (không dùng token của Google) để đảm bảo tính nhất quán với toàn bộ luồng xác thực còn lại.
 
-### Kiểm soát tồn kho khi có nhiều yêu cầu đồng thời
+**Refresh Token Rotation:** Mỗi lần làm mới phiên, refresh token cũ bị vô hiệu hóa và cấp token mới — hạn chế rủi ro nếu token bị lộ.
 
-Khi đặt hàng, hệ thống cập nhật số lượng tồn kho theo điều kiện số lượng hiện có phải đủ đáp ứng đơn hàng. Cách xử lý này giúp hạn chế việc nhiều người dùng cùng mua một biến thể sản phẩm vượt quá tồn kho.
+**JWT Blacklist bằng Redis:**
 
-### Xử lý sự kiện và tác vụ định kỳ
+Thay vì lưu token đã thu hồi vào cơ sở dữ liệu (phải query DB ở mọi request và cần job dọn dẹp định kỳ), hệ thống lưu vào Redis với TTL bằng đúng thời gian còn lại của token. Redis tự xóa khi token hết hạn — không cần thêm tác vụ dọn dẹp.
 
-Email xác nhận đơn hàng được gửi thông qua **Brevo SMTP** sau khi giao dịch tạo đơn hoàn tất thành công. Phía backend sử dụng **Spring Mail** để kết nối và thực hiện việc gửi email. Ngoài ra, tác vụ định kỳ được sử dụng để tự động hủy các đơn thanh toán VNPay đã quá thời hạn.
+```
+POST /auth/logout
+  → Lấy JTI từ token
+  → SET "blacklist:{jti}" = "revoked"  EX {giây còn lại}
+  → Mọi request tiếp theo đều bị từ chối khi verifyToken() phát hiện key này
+```
+
+---
+
+### 2. Kiểm soát tồn kho an toàn khi có nhiều yêu cầu đồng thời
+
+**Vấn đề:** Nhiều người dùng cùng đặt hàng một sản phẩm có tồn kho giới hạn → nguy cơ bán vượt số lượng.
+
+**Giải pháp — Atomic SQL Update:**
+
+```sql
+UPDATE product_variants
+SET stock_quantity = stock_quantity - :quantity
+WHERE id = :variantId
+  AND stock_quantity >= :quantity
+```
+
+Câu lệnh này chỉ thực hiện khi tồn kho đủ. Nếu trả về 0 dòng bị ảnh hưởng → hệ thống trả lỗi `INSUFFICIENT_STOCK` ngay lập tức, không cần khóa tầng ứng dụng.
+
+Ngoài ra, `ProductVariant` sử dụng **Optimistic Locking** (`@Version`) để phát hiện xung đột ghi đồng thời từ các luồng khác nhau.
+
+---
+
+### 3. Gửi email không đồng bộ, đảm bảo tính nhất quán giao dịch
+
+**Vấn đề:** Nếu gửi email ngay trong transaction tạo đơn hàng → email có thể được gửi dù transaction bị rollback.
+
+**Giải pháp:**
+
+```
+createOrder()  →  DB commit thành công
+  → ApplicationEventPublisher.publishEvent(OrderPlaceEvent)
+    → @TransactionalEventListener(phase = AFTER_COMMIT)
+      → @Async  →  EmailService.sendEmail()
+                   (chạy trên thread pool riêng, không chặn response)
+```
+
+`@TransactionalEventListener(phase = AFTER_COMMIT)` đảm bảo email chỉ gửi sau khi dữ liệu đã được lưu thành công. `@Async` đảm bảo việc gửi email không làm chậm response trả về người dùng.
+
+---
+
+### 4. Quản lý trạng thái đơn hàng
+
+Đơn hàng chuyển trạng thái theo một luồng được kiểm soát chặt chẽ, không cho phép nhảy cóc hoặc quay ngược:
+
+```
+PENDING → CONFIRMED → PROCESSING → SHIPPING → DELIVERED → COMPLETED
+   │           │             │
+   └───────────┴─────────────┴──────────────────────────────► CANCELLED
+                                                    SHIPPING / DELIVERED ──► RETURNED
+```
+
+- Đơn COD được tự động xác nhận ngay sau khi đặt.
+- Đơn VNPay chưa thanh toán sau 15 phút sẽ bị hủy tự động bởi `@Scheduled` job.
+- Khi đơn ở trạng thái RETURNED hoặc CANCELLED, tồn kho được hoàn trả lại.
+
+---
+
+### 5. Giỏ hàng cho cả khách và người dùng đã đăng nhập
+
+| Trường hợp | Định danh | Lưu trữ |
+|-----------|----------|---------|
+| Khách chưa đăng nhập | `sessionId` (Cookie) | Database |
+| Người dùng đã đăng nhập | `userId` | Database |
+| Sau khi đăng nhập | Hợp nhất giỏ khách vào giỏ user | Tự động |
+
+Khi hợp nhất, số lượng được cộng dồn nhưng bị giới hạn theo tồn kho thực tế.
+
+---
+
+### 6. Redis Cache cho dữ liệu ít thay đổi
+
+| Cache | Phương thức | Điều kiện xóa cache |
+|------|------------|-------------------|
+| `products` | `getProductById(id)` | Cập nhật / xóa sản phẩm hoặc biến thể |
+| `categories` | `getAllCategories()`, `getCategoryById(id)` | Tạo / sửa / xóa danh mục |
+| `brands` | `getAllBrands()` | Tạo / sửa / xóa thương hiệu |
+
+TTL mặc định 60 phút, có thể cấu hình lại trong `RedisConfig`.
+
+---
 
 ## Kiến trúc dự án
 
 ```text
-Client
+Client (HTTP / REST)
   │
   ▼
 Spring Security Filter Chain
+  ├── JwtAuthenticationFilter   →  verify JWT + check Redis Blacklist
+  └── OAuth2 Login Handler      →  Google Authorization Code Flow
   │
   ▼
-Controller  →  Service  →  Repository  →  MySQL
-                  │
-                  ├── Redis Cache / Token Blacklist
-                  ├── Event Listener / Email
-                  └── Scheduled Jobs
+Controller Layer   (validate input, route mapping)
+  │
+  ▼
+Service Layer      (business logic, transactions, events)
+  ├── Redis Cache        (@Cacheable / @CacheEvict)
+  ├── Redis Blacklist    (token revocation)
+  ├── Event Publisher    (OrderPlaceEvent → email async)
+  └── Scheduled Jobs     (order expiration, cart cleanup)
+  │
+  ▼
+Repository Layer   (JPA / Specifications / custom queries)
+  │
+  ▼
+MySQL Database
 ```
 
 ## Cấu trúc thư mục
