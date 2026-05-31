@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
     AttributeDefinitionRepository attributeDefinitionRepository;
     ProductVariantMapper productVariantMapper;
 
+    @CacheEvict(value = "products", key = "#id")
     @Override
     public ProductVariantResponse createProductVariant(Long id, ProductVariantCreationRequest request) {
         Product product = productRepository.findById(id).orElseThrow(() ->
@@ -91,6 +93,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
                 .map(productVariantMapper::toProductVariantResponse).toList();
     }
 
+    @CacheEvict(value = "products", key = "#result.productId")
     @Override
     public ProductVariantResponse updateProductVariantByStatus(long id, ProductVariantUpdateStatusRequest status) {
         ProductVariant productVariant = productVariantRepository.findById(id).orElseThrow(
@@ -99,6 +102,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         return productVariantMapper.toProductVariantResponse(productVariantRepository.save(productVariant));
     }
 
+    @CacheEvict(value = "products", key = "#result.productId")
     @Override
     public ProductVariantResponse updateProductVariant(long id, ProductVariantUpdateRequest request) {
         ProductVariant productVariant = productVariantRepository.findById(id).orElseThrow(() ->

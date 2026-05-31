@@ -1,10 +1,8 @@
 package com.nguyenhuugiap.computer_shop.controller;
 
 import com.nguyenhuugiap.computer_shop.dto.ApiResponse;
-import com.nguyenhuugiap.computer_shop.dto.product.AdminProductDetailResponse;
-import com.nguyenhuugiap.computer_shop.dto.product.ProductCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.product.ProductResponse;
-import com.nguyenhuugiap.computer_shop.dto.product.UpdateProductStatusRequest;
+import com.nguyenhuugiap.computer_shop.dto.PageResponse;
+import com.nguyenhuugiap.computer_shop.dto.product.*;
 import com.nguyenhuugiap.computer_shop.service.interfaces.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -12,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -31,10 +27,13 @@ public class ProductController {
     }
 
     @GetMapping
-    public ApiResponse<List<ProductResponse>> getAllProducts() {
-        return ApiResponse.<List<ProductResponse>>builder()
-                .result(productService.getAllProducts())
+    public ApiResponse<PageResponse<ProductResponse>> getAllProducts(@ModelAttribute ProductSearchRequest request,
+                                                                     @RequestParam(defaultValue = "1") int page,
+                                                                     @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<ProductResponse>>builder()
+                .result(productService.getAllProducts(request, page, size))
                 .build();
+
     }
 
     @GetMapping("/{id}")

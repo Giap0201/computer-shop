@@ -12,6 +12,8 @@ import com.nguyenhuugiap.computer_shop.service.interfaces.CategoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
+    @Cacheable(value = "categories", key = "'all'")
     @Override
     @Transactional(readOnly = true)
     public List<CategoryResponse> getAllCategories() {
@@ -46,6 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .map(categoryMapper::toResponse).toList();
     }
 
+    @Cacheable(value = "categories", key = "'roots'")
     @Override
     @Transactional(readOnly = true)
     public List<CategoryResponse> getCategoryRoots() {
@@ -53,6 +57,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .stream().map(categoryMapper::toResponse).toList();
     }
 
+    @Cacheable(value = "categories", key = "#id")
     @Override
     @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(long id) {
@@ -61,6 +66,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toResponse(category);
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Override
     @Transactional
     public void deleteCategoryById(long id) {
@@ -71,6 +77,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.deleteById(id);
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Override
     @Transactional
     public CategoryResponse updateCategory(Long id, CategoryUpdateRequest request) {
