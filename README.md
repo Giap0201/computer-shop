@@ -1,261 +1,219 @@
-#  Computer Shop Backend - RESTful API
+<h1 align="center">Computer Shop API</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Spring%20Boot-3.5.9-brightgreen" />
-  <img src="https://img.shields.io/badge/Java-21-blue" />
-  <img src="https://img.shields.io/badge/MySQL-8.0-orange" />
-  <img src="https://img.shields.io/badge/JWT-Stateless-red" />
+  RESTful API cho hệ thống bán máy tính, linh kiện và thiết bị công nghệ
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-21-blue?logo=openjdk&logoColor=white" alt="Java 21" />
+  <img src="https://img.shields.io/badge/Spring%20Boot-3.5.9-brightgreen?logo=springboot&logoColor=white" alt="Spring Boot 3.5.9" />
+  <img src="https://img.shields.io/badge/MySQL-8.0-orange?logo=mysql&logoColor=white" alt="MySQL 8.0" />
+  <img src="https://img.shields.io/badge/Redis-7.x-red?logo=redis&logoColor=white" alt="Redis 7.x" />
+  <img src="https://img.shields.io/badge/OAuth2-Google-4285F4?logo=google&logoColor=white" alt="Google OAuth2" />
+  <img src="https://img.shields.io/badge/OpenAPI-Swagger-85EA2D?logo=swagger&logoColor=black" alt="Swagger" />
 </p>
 
 ---
 
-# 📝 Giới Thiệu Dự Án
+## Giới thiệu
 
-**Computer Shop Backend** là hệ thống RESTful API phục vụ cho mô hình thương mại điện tử chuyên bán máy tính, linh kiện và thiết bị điện tử.
+**Computer Shop API** là dự án backend cho website thương mại điện tử chuyên bán máy tính, linh kiện và thiết bị công nghệ. Hệ thống cung cấp các API phục vụ xác thực người dùng, quản lý sản phẩm, giỏ hàng, đơn hàng, thanh toán và quản trị.
 
-Dự án được phát triển bằng **Spring Boot 3.5.9** và **Java 21**, tập trung vào:
+Dự án được xây dựng bằng **Spring Boot** theo kiến trúc phân lớp, kết hợp **MySQL** để lưu trữ dữ liệu, **Redis** để cache và hỗ trợ quản lý token, đồng thời tích hợp **Google OAuth2**, **VNPay Sandbox** và gửi email thông báo.
 
-- Hiệu năng cao
-- Kiến trúc chuẩn doanh nghiệp
-- Bảo mật JWT Stateless
-- Xử lý đồng thời an toàn
-- Hệ thống dễ mở rộng và bảo trì
+## Công nghệ sử dụng
 
----
+| Nhóm | Công nghệ |
+| --- | --- |
+| Ngôn ngữ | Java 21 |
+| Framework | Spring Boot 3.5.9 |
+| Bảo mật | Spring Security, JWT, Google OAuth2 |
+| Cơ sở dữ liệu | MySQL 8.0, Spring Data JPA, Hibernate |
+| Cache | Redis, Spring Cache |
+| Mapping & Validation | MapStruct, Jakarta Bean Validation, Lombok |
+| Tài liệu API | Springdoc OpenAPI, Swagger UI |
+| Tích hợp | VNPay Sandbox, Brevo SMTP, Google OAuth2 |
+| Xử lý nền | Spring Events, `@Async`, `@Scheduled` |
 
-# 🛠️ Công Nghệ Sử Dụng
+## Chức năng chính
 
-## 🔹 Core Framework
-- Java 21
-- Spring Boot 3.5.9
+### Người dùng và xác thực
 
-## 🔹 Security & Authentication
-- Spring Security
-- JWT Authentication
-- Nimbus JOSE-JWT
-- Access Token / Refresh Token
-- Token Blacklist
+- Đăng ký, đăng nhập bằng email và mật khẩu.
+- Đăng nhập bằng tài khoản Google thông qua OAuth2.
+- Xác thực API bằng Access Token và Refresh Token.
+- Đăng xuất và vô hiệu hóa token đã thu hồi.
+- Xem và cập nhật thông tin cá nhân.
 
-## 🔹 Database & ORM
-- MySQL
-- Spring Data JPA
-- Hibernate
-- JPA Specifications (Criteria API)
+### Sản phẩm và danh mục
 
-## 🔹 Third-party Integrations
-- VNPay Sandbox
-- Java Mail Sender
+- Xem danh sách, chi tiết sản phẩm, biến thể sản phẩm.
+- Tìm kiếm và lọc sản phẩm theo điều kiện.
+- Quản lý danh mục, thương hiệu, sản phẩm và hình ảnh sản phẩm dành cho quản trị viên.
+- Cache dữ liệu sản phẩm, danh mục và thương hiệu bằng Redis.
 
-## 🔹 Utilities & Libraries
-- MapStruct
-- Lombok
-- Swagger OpenAPI 3
-- Spring Async Events
+### Giỏ hàng và đơn hàng
 
----
+- Hỗ trợ giỏ hàng cho khách chưa đăng nhập bằng `sessionId`.
+- Hỗ trợ giỏ hàng cho người dùng đã đăng nhập.
+- Hợp nhất giỏ hàng sau khi đăng nhập.
+- Đặt hàng, xem lịch sử mua hàng và theo dõi trạng thái đơn hàng.
+- Kiểm tra tồn kho khi tạo đơn, hạn chế tình trạng bán vượt số lượng hiện có.
 
-# 🏛️ Kiến Trúc Hệ Thống
+### Thanh toán và thông báo
 
-Dự án áp dụng mô hình:
+- Thanh toán khi nhận hàng (COD).
+- Thanh toán trực tuyến qua VNPay Sandbox.
+- Tự động xử lý đơn VNPay quá hạn thanh toán.
+- Gửi email thông báo sau khi đơn hàng được tạo thành công.
 
-```text
-Controller → Service → Repository → Database
-```
+### Quản trị hệ thống
 
-Kết hợp nhiều giải pháp xử lý nghiệp vụ thực tế.
+- Quản lý người dùng và phân quyền.
+- Quản lý sản phẩm, danh mục, thương hiệu.
+- Quản lý đơn hàng và cập nhật trạng thái xử lý.
 
----
+## Một số điểm kỹ thuật nổi bật
 
-## 1️⃣ Atomic Inventory Decrement
+### Xác thực và bảo mật
 
-Ngăn chặn lỗi bán vượt số lượng tồn kho bằng câu lệnh update nguyên tử:
+Hệ thống sử dụng JWT cho các API cần xác thực, kết hợp Access Token và Refresh Token. Refresh Token được xoay vòng khi làm mới phiên đăng nhập. Token bị thu hồi được lưu trong Redis với thời gian sống tương ứng thời hạn còn lại của token.
 
-```sql
-UPDATE ProductVariant pv
-SET pv.stockQuantity = pv.stockQuantity - :quantity
-WHERE pv.id = :variantId
-AND pv.stockQuantity >= :quantity
-```
+### Cache bằng Redis
 
----
+Redis được sử dụng để giảm số lần truy vấn dữ liệu ít thay đổi hoặc được truy cập thường xuyên như sản phẩm, danh mục và thương hiệu. Cache được xóa hoặc cập nhật lại khi dữ liệu liên quan thay đổi.
 
-## 2️⃣ Event-Driven Architecture
+### Kiểm soát tồn kho khi có nhiều yêu cầu đồng thời
 
-Sử dụng:
+Khi đặt hàng, hệ thống cập nhật số lượng tồn kho theo điều kiện số lượng hiện có phải đủ đáp ứng đơn hàng. Cách xử lý này giúp hạn chế việc nhiều người dùng cùng mua một biến thể sản phẩm vượt quá tồn kho.
 
-- `Spring Events`
-- `@Async`
-- `@TransactionalEventListener`
+### Xử lý sự kiện và tác vụ định kỳ
 
-để gửi email bất đồng bộ sau khi transaction commit thành công.
+Email xác nhận đơn hàng được gửi thông qua **Brevo SMTP** sau khi giao dịch tạo đơn hoàn tất thành công. Phía backend sử dụng **Spring Mail** để kết nối và thực hiện việc gửi email. Ngoài ra, tác vụ định kỳ được sử dụng để tự động hủy các đơn thanh toán VNPay đã quá thời hạn.
 
----
-
-## 3️⃣ Dual Cart Merge Strategy
-
-Hỗ trợ:
-
-- Guest Cart (`sessionId`)
-- User Cart (Database)
-
-Tự động merge giỏ hàng sau khi đăng nhập.
-
----
-
-## 4️⃣ Scheduled Jobs
-
-Sử dụng `@Scheduled` để:
-
-- Xóa guest cart cũ
-- Cleanup token blacklist
-- Hủy đơn hàng VNPay quá hạn
-
----
-
-# 👥 Vai Trò Trong Hệ Thống
-
-## 👤 Guest
-- Xem sản phẩm
-- Xem danh mục
-- Quản lý giỏ hàng tạm
-
----
-
-## 👤 User
-- Quản lý tài khoản
-- Đặt hàng
-- Thanh toán VNPay/COD
-- Theo dõi đơn hàng
-- Quản lý giỏ hàng
-
----
-
-## 👑 Admin
-- CRUD sản phẩm
-- CRUD biến thể sản phẩm
-- Quản lý đơn hàng
-- Upload ảnh sản phẩm
-- Quản lý thương hiệu & danh mục
-
----
-
-# 🌟 Chức Năng Chính
-
-## ✅ Authentication & Authorization
-- Đăng ký
-- Đăng nhập
-- JWT Authentication
-- Refresh Token
-- Logout blacklist token
-
----
-
-## ✅ Product Variant Management
-
-Quản lý cấu hình linh kiện động:
-
-- CPU
-- RAM
-- VGA
-- SSD
-- Mainboard
-- ...
-
----
-
-## ✅ Smart Cart System
-- Kiểm tra tồn kho realtime
-- Merge cart Guest/User
-
----
-
-## ✅ Order Management
-
-Flow trạng thái chặt chẽ:
+## Kiến trúc dự án
 
 ```text
-PENDING
-→ CONFIRMED
-→ PROCESSING
-→ SHIPPING
-→ DELIVERED
-→ COMPLETED
+Client
+  │
+  ▼
+Spring Security Filter Chain
+  │
+  ▼
+Controller  →  Service  →  Repository  →  MySQL
+                  │
+                  ├── Redis Cache / Token Blacklist
+                  ├── Event Listener / Email
+                  └── Scheduled Jobs
 ```
 
----
+## Cấu trúc thư mục
 
-## ✅ VNPay Integration
-- Sinh URL thanh toán
-- Xử lý IPN callback
-- Query transaction status
+```text
+src/main/java/com/nguyenhuugiap/computer_shop/
+├── configuration/       # Cấu hình Redis, CORS, Async, VNPay, lưu trữ tệp
+├── controller/          # REST Controller
+│   └── admin/           # API dành cho quản trị viên
+├── dto/                 # Dữ liệu request/response
+├── entity/              # JPA Entity
+├── enums/               # Các kiểu liệt kê của hệ thống
+├── event/               # Sự kiện nghiệp vụ
+├── exception/           # Xử lý ngoại lệ và mã lỗi
+├── job/                 # Tác vụ định kỳ
+├── listener/            # Bộ lắng nghe sự kiện
+├── mapper/              # MapStruct Mapper
+├── repository/          # Truy xuất dữ liệu
+├── security/            # JWT, OAuth2, cấu hình Spring Security
+├── service/             # Xử lý nghiệp vụ
+├── specification/       # Truy vấn động bằng JPA Specification
+└── utils/               # Các lớp tiện ích
+```
 
----
+## Các nhóm API
 
-# ⚙️ Cài Đặt Và Chạy Dự Án
+| Nhóm chức năng | Đường dẫn cơ sở | Quyền truy cập |
+| --- | --- | --- |
+| Xác thực | `/api/auth/**` | Công khai |
+| Đăng nhập Google | `/api/oauth2/authorization/google` | Công khai |
+| Người dùng | `/api/users/**` | Người dùng / Quản trị viên |
+| Sản phẩm | `/api/products/**` | Xem công khai, quản lý bởi Admin |
+| Danh mục | `/api/categories/**` | Xem công khai, quản lý bởi Admin |
+| Thương hiệu | `/api/brands/**` | Xem công khai, quản lý bởi Admin |
+| Giỏ hàng | `/api/carts/**` | Khách hoặc người dùng |
+| Đơn hàng | `/api/orders/**` | Người dùng / Quản trị viên |
+| Thanh toán | `/api/payments/**` | Tùy nghiệp vụ |
+| Tệp hình ảnh | `/api/files/**` | Quản trị viên |
 
-## 1️⃣ Clone Project
+## Hướng dẫn chạy dự án
+
+### Yêu cầu môi trường
+
+- Java 21 trở lên
+- Maven 3.8 trở lên
+- MySQL 8.0 trở lên
+- Redis 7.x
+
+### 1. Tải mã nguồn
 
 ```bash
 git clone https://github.com/Giap0201/computer-shop.git
-
 cd computer-shop
 ```
 
----
-
-## 2️⃣ Database Setup
-
-Tạo database:
+### 2. Tạo cơ sở dữ liệu
 
 ```sql
-CREATE DATABASE computer_shop
+CREATE DATABASE computer_shop_db
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 ```
 
----
+### 3. Cấu hình ứng dụng
 
-# 🔑 Cấu Hình Environment
+Tạo hoặc cập nhật tệp `src/main/resources/application.properties`:
 
-Tạo file:
+```properties
+# Server
+server.port=8080
+server.servlet.context-path=/api
 
-```text
-src/main/resources/application.yml
+# MySQL
+spring.datasource.url=jdbc:mysql://localhost:3306/computer_shop_db?useUnicode=true&characterEncoding=UTF-8
+spring.datasource.username=YOUR_DB_USERNAME
+spring.datasource.password=YOUR_DB_PASSWORD
+
+# JWT
+jwt.signer-key=YOUR_BASE64_ACCESS_SECRET_KEY
+jwt.refresh-signer-key=YOUR_BASE64_REFRESH_SECRET_KEY
+jwt.valid-duration=604800
+jwt.refreshable-duration=604800
+
+# Redis
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+
+# Google OAuth2
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=openid,email,profile
+app.oauth2.redirect-uri=http://localhost:3002/oauth2/callback
+
+# Email
+spring.mail.host=smtp-relay.brevo.com
+spring.mail.port=587
+spring.mail.username=YOUR_BREVO_EMAIL
+spring.mail.password=YOUR_BREVO_API_KEY
+
+# VNPay Sandbox
+vnpay.tmn-code=YOUR_TMN_CODE
+vnpay.hash-secret=YOUR_HASH_SECRET
+vnpay.url=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+vnpay.return-url=http://localhost:8080/api/payments/vnpay-return
 ```
 
-Ví dụ cấu hình:
+> Không đưa mật khẩu, khóa JWT, thông tin OAuth2 hoặc khóa VNPay thật lên GitHub. Nên sử dụng biến môi trường cho các thông tin nhạy cảm.
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/computer_shop
-    username: root
-    password: your_password
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-
-jwt:
-  signer-key: your_access_secret_key
-  refresh-signer-key: your_refresh_secret_key
-
-vnpay:
-  tmn-code: your_tmn_code
-  hash-secret: your_hash_secret
-```
-
----
-
-# ▶️ Chạy Ứng Dụng
-
-## Build Project
-
-```bash
-mvn clean compile
-```
-
-## Run Application
+### 4. Khởi chạy ứng dụng
 
 ```bash
 mvn spring-boot:run
@@ -264,79 +222,26 @@ mvn spring-boot:run
 Ứng dụng chạy tại:
 
 ```text
-http://localhost:8080
+http://localhost:8080/api
 ```
 
----
+### 5. Xem tài liệu API
 
-# 🔐 Tài Khoản Mặc Định
-
-Hệ thống tự động tạo admin khi chạy lần đầu:
+Sau khi ứng dụng chạy thành công, truy cập Swagger UI tại:
 
 ```text
-Email: admin@gmail.com
-Password: admin
+http://localhost:8080/api/swagger-ui/index.html
 ```
+
+## Tác giả
+
+**Nguyễn Hữu Giáp**  
+Backend Developer
+
+- GitHub: [Giap0201](https://github.com/Giap0201)
 
 ---
 
-# 📖 API Documentation
-
-## Swagger UI
-
-```text
-http://localhost:8080/swagger-ui/index.html
-```
-
-## OpenAPI JSON
-
-```text
-http://localhost:8080/v3/api-docs
-```
-
----
-
-# 📂 Cấu Trúc Thư Mục
-
-```text
-src/main/java/com/nguyenhuugiap/computer_shop
-│
-├── configuration
-├── controller
-│   └── admin
-├── dto
-├── entity
-├── enums
-├── event
-├── exception
-├── job
-├── listener
-├── mapper
-├── repository
-├── security
-├── service
-├── specification
-└── utils
-```
-
----
-
-# 🔮 Hướng Phát Triển Tương Lai
-
-- Redis Caching
-- Elasticsearch
-- OAuth2 Social Login
-- Docker Compose
-- Unit Test & Integration Test
-- API Rate Limiting
-- CI/CD Pipeline
-
----
-
-# 👨‍💻 Thành Viên
-
-## Nguyễn Hữu Giáp
-### Backend Developer & System Architect
-
-- 📧 Email: admin@gmail.com
-- 🌐 GitHub: https://github.com/Giap0201
+<p align="center">
+  Xây dựng với Spring Boot, MySQL và Redis
+</p>
