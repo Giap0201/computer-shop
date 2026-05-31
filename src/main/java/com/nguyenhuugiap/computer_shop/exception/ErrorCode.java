@@ -39,7 +39,8 @@ public enum ErrorCode {
     GENDER_INVALID(3007, "Giới tính không đúng định dạng (MALE, FEMALE, OTHER)", HttpStatus.BAD_REQUEST),
     // --- ROLE (35XX) ---
     ROLE_NOT_FOUND(3501, "Vai trò (Role) không tồn tại", HttpStatus.NOT_FOUND),
-
+    ROLE_NAME_INVALID(3502, "Role không hợp lệ", HttpStatus.BAD_REQUEST),
+    CANNOT_SELF_REVOKE_ROLE(3503, "Không thể thu hồi quyền của chính mình", HttpStatus.BAD_REQUEST),
     // --- BRAND (40XX) ---
     BRAND_EXISTS(4001, "Thương hiệu này đã tồn tại", HttpStatus.BAD_REQUEST),
     BRAND_NAME_REQUIRED(4002, "Tên thương hiệu bắt buộc nhập", HttpStatus.BAD_REQUEST),

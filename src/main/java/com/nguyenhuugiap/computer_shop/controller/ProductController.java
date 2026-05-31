@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
     ProductService productService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ProductResponse> createProduct(@RequestBody @Valid ProductCreationRequest productCreationRequest) {
@@ -43,6 +45,7 @@ public class ProductController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> deleteProductById(@PathVariable long id) {
@@ -57,6 +60,7 @@ public class ProductController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{productId}/status")
     ApiResponse<ProductResponse> updateProductStatus(@PathVariable long productId, @RequestBody @Valid UpdateProductStatusRequest request) {
         return ApiResponse.<ProductResponse>builder()

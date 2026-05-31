@@ -46,6 +46,7 @@ public class ProductVariantController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{productId}/variants/{variantId}/status")
     ApiResponse<ProductVariantResponse> updateProductVariantByStatus(@PathVariable Long productId, @PathVariable Long variantId,
                                                                      @RequestBody ProductVariantUpdateStatusRequest status) {
@@ -54,6 +55,7 @@ public class ProductVariantController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{productId}/variants/{variantId}")
     ApiResponse<ProductVariantResponse> updateProductVariant(@PathVariable Long productId, @PathVariable Long variantId,
                                                              @RequestBody @Valid ProductVariantUpdateRequest request) {
