@@ -30,11 +30,13 @@ public class SecurityConfig {
 
     String[] PUBLIC_ENDPOINTS = {"/users/**", "/auth/**"};
     String[] CATEGORIES_PUBLIC_ENDPOINTS = {"/categories/**", "/brands/**", "/uploads/**"};
-    String[] PRODUCTS_PUBLIC_ENDPOINTS = {"/products/**", "/attributes/**"};
+    String[] PRODUCTS_PUBLIC_ENDPOINTS = {"/products/**", "/attributes/**", "/redis-test/**"};
 
     JwtAuthenticationFilter jwtAuthenticationFilter;
     CustomAccessDeniedHandler customAccessDeniedHandler;
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -66,10 +68,16 @@ public class SecurityConfig {
                                 // Admin paths
                                 .requestMatchers(HttpMethod.POST, "/files/**").hasRole("ADMIN")
 
+                                .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
+
                                 .anyRequest().authenticated())
+                .oauth2Login(oath2 -> oath2
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

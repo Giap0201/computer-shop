@@ -39,7 +39,8 @@ public enum ErrorCode {
     GENDER_INVALID(3007, "Giới tính không đúng định dạng (MALE, FEMALE, OTHER)", HttpStatus.BAD_REQUEST),
     // --- ROLE (35XX) ---
     ROLE_NOT_FOUND(3501, "Vai trò (Role) không tồn tại", HttpStatus.NOT_FOUND),
-
+    ROLE_NAME_INVALID(3502, "Role không hợp lệ", HttpStatus.BAD_REQUEST),
+    CANNOT_SELF_REVOKE_ROLE(3503, "Không thể thu hồi quyền của chính mình", HttpStatus.BAD_REQUEST),
     // --- BRAND (40XX) ---
     BRAND_EXISTS(4001, "Thương hiệu này đã tồn tại", HttpStatus.BAD_REQUEST),
     BRAND_NAME_REQUIRED(4002, "Tên thương hiệu bắt buộc nhập", HttpStatus.BAD_REQUEST),
@@ -112,6 +113,9 @@ public enum ErrorCode {
     STATUS_NOT_CHANGED(4526, "Trạng thái đơn hàng không thay đổi", HttpStatus.BAD_REQUEST),
     PENDING_TRANSACTION_NOT_FOUND(4527, "Không tìm thấy giao dịch đang chờ xử lý", HttpStatus.NOT_FOUND),
     ORDER_ALREADY_PAID(4528, "Đơn hàng đã được thanh toán hoặc không thể xử lý lại", HttpStatus.BAD_REQUEST),
+    CANNOT_CANCEL_ORDER(4529, "Chỉ có thể huỷ đơn hàng khi đang ở trạng thái PENDING hoặc CONFIRMED", HttpStatus.BAD_REQUEST),
+    INVALID_STATUS_TRANSITION(4530, "Luồng chuyển đổi trạng thái không hợp lệ (Nhảy cóc hoặc lùi trạng thái)", HttpStatus.BAD_REQUEST),
+    CONCURRENT_UPDATE_DETECTED(4531, "Đơn hàng vừa được cập nhật bởi một người khác. Vui lòng tải lại trang để xem dữ liệu mới nhất", HttpStatus.CONFLICT),
 
     // --- CATEGORY (46XX) ---
     CATEGORY_NAME_REQUIRED(4601, "Tên danh mục bắt buộc nhập", HttpStatus.BAD_REQUEST),

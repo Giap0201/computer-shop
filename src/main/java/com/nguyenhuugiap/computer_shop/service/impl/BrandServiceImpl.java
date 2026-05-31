@@ -12,6 +12,8 @@ import com.nguyenhuugiap.computer_shop.service.interfaces.BrandService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +35,14 @@ public class BrandServiceImpl implements BrandService {
                 .save(brandMapper.toEntity(request)));
     }
 
+    @Cacheable(value = "brands", key = "'all'")
     @Override
     @Transactional(readOnly = true)
     public List<BrandResponse> getAllBrands() {
         return brandRepository.findAll().stream().map(brandMapper::toResponse).toList();
     }
 
+    @CacheEvict(value = "brands", allEntries = true)
     @Override
     public BrandResponse updateBrand(Long id, BrandUpdateRequest request) {
         Brand brand = brandRepository.findById(id).orElseThrow(() ->
@@ -51,12 +55,14 @@ public class BrandServiceImpl implements BrandService {
         return brandMapper.toResponse(brandRepository.save(brand));
     }
 
+    @CacheEvict(value = "brands", allEntries = true)
     @Override
     public void deleteBrand(Long id) {
         if (!brandRepository.existsById(id)) throw new AppException(ErrorCode.BRAND_NOT_FOUND);
         brandRepository.deleteById(id);
     }
 
+    @Cacheable(value = "brands", key = "#id")
     @Override
     @Transactional(readOnly = true)
     public BrandResponse getBrandById(Long id) {

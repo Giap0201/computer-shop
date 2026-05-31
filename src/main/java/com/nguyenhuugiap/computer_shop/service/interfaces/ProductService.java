@@ -1,16 +1,12 @@
 package com.nguyenhuugiap.computer_shop.service.interfaces;
 
-import com.nguyenhuugiap.computer_shop.dto.product.AdminProductDetailResponse;
-import com.nguyenhuugiap.computer_shop.dto.product.ProductCreationRequest;
-import com.nguyenhuugiap.computer_shop.dto.product.ProductResponse;
-import com.nguyenhuugiap.computer_shop.dto.product.UpdateProductStatusRequest;
-
-import java.util.List;
+import com.nguyenhuugiap.computer_shop.dto.PageResponse;
+import com.nguyenhuugiap.computer_shop.dto.product.*;
 
 public interface ProductService {
     ProductResponse createProduct(ProductCreationRequest productCreationRequest);
 
-    List<ProductResponse> getAllProducts();
+    PageResponse<ProductResponse> getAllProducts(ProductSearchRequest request, int page, int size);
 
     ProductResponse getProductById(long id);
 

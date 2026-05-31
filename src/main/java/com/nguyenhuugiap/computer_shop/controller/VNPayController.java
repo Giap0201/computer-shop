@@ -21,7 +21,7 @@ public class VNPayController {
 
     PaymentService paymentService;
 
-    @GetMapping("/create-url")
+    @PostMapping("/create-url")
     public ResponseEntity<ApiResponse<String>> createPaymentUrl(
             @RequestParam String orderCode,
             HttpServletRequest request) {

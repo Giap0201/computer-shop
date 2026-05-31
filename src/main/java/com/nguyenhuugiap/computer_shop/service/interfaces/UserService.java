@@ -1,5 +1,6 @@
 package com.nguyenhuugiap.computer_shop.service.interfaces;
 
+import com.nguyenhuugiap.computer_shop.dto.user.RoleAssignmentRequest;
 import com.nguyenhuugiap.computer_shop.dto.user.UserCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.user.UserUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.user.UserResponse;
@@ -15,4 +16,6 @@ public interface UserService {
     UserResponse getUserByEmail(String email);
     UserResponse getUserByPhone(String phone);
     UserResponse getMyInfo();
+    void assignRoleToUser(Long userId, RoleAssignmentRequest request);
+    void revokeRoleFromUser(Long userId, RoleAssignmentRequest request);
 }

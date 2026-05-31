@@ -1,17 +1,9 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
-import com.nguyenhuugiap.computer_shop.dto.authenticate.AuthenticateRequest;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.IntrospectRequest;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.LogoutRequest;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.RefreshTokenRequest;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.AuthenticateResponse;
-import com.nguyenhuugiap.computer_shop.dto.authenticate.IntrospectResponse;
-import com.nguyenhuugiap.computer_shop.dto.user.UserResponse;
-import com.nguyenhuugiap.computer_shop.entity.InvalidatedToken;
+import com.nguyenhuugiap.computer_shop.dto.authenticate.*;
 import com.nguyenhuugiap.computer_shop.entity.User;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
-import com.nguyenhuugiap.computer_shop.repository.InvalidatedTokenRepository;
 import com.nguyenhuugiap.computer_shop.repository.UserRepository;
 import com.nguyenhuugiap.computer_shop.service.interfaces.AuthenticateService;
 import com.nimbusds.jose.*;
@@ -25,10 +17,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
@@ -38,6 +29,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -46,7 +38,7 @@ import java.util.UUID;
 public class AuthenticateServiceImpl implements AuthenticateService {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
-    InvalidatedTokenRepository invalidatedTokenRepository;
+    StringRedisTemplate redisTemplate;
     @NonFinal
     @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;
@@ -125,8 +117,8 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
         if (!(verified && expirationDate.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
-        if (invalidatedTokenRepository.existsById(jti)) {
-            log.warn("Invalid token");
+        if (Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + jti))) {
+            log.warn("Invalid token: Đã bị đưa vào danh sách đen!");
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         return signedJWT.getJWTClaimsSet();
@@ -140,32 +132,31 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     }
 
     private void invalidateToken(String token) {
-        if(token == null || token.isBlank()) return;
+        if (token == null || token.isBlank()) return;
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
             String jti = signedJWT.getJWTClaimsSet().getJWTID();
             Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
-            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                    .id(jti)
-                    .expires(expirationDate)
-                    .build();
-            invalidatedTokenRepository.save(invalidatedToken);
-        } catch (Exception e) {
-            log.warn(e.getMessage());
-        }
 
+            long expiryTime = expirationDate.getTime();
+            long currentTime = new Date().getTime();
+            long remainingTime = expiryTime - currentTime;
+
+            if (remainingTime <= 0) return;
+
+            // add to redis key: blacklist:+jti
+            // value: revoked
+            redisTemplate.opsForValue().set("blacklist:" + jti, "revoked", remainingTime, TimeUnit.MILLISECONDS);
+            log.info("Token {} đã bị đưa vào Blacklist. Tự động xóa sau {} ms", jti, remainingTime);
+        } catch (Exception e) {
+            log.warn("Lỗi khi đưa token vào blacklist: {}", e.getMessage());
+        }
     }
 
     @Override
     public AuthenticateResponse refreshToken(RefreshTokenRequest request) throws ParseException, JOSEException {
         JWTClaimsSet jwtClaimsSet = verifyToken(request.getToken(), REFRESH_SIGNER_KEY);
-        Date expirationDate = jwtClaimsSet.getExpirationTime();
-        String jti = jwtClaimsSet.getJWTID();
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .expires(expirationDate)
-                .id(jti)
-                .build();
-        invalidatedTokenRepository.save(invalidatedToken);
+        invalidateToken(request.getToken());
         Long id = Long.parseLong(jwtClaimsSet.getSubject());
         User user = userRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));

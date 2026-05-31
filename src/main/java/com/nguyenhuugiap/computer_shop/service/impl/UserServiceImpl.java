@@ -1,6 +1,7 @@
 package com.nguyenhuugiap.computer_shop.service.impl;
 
 
+import com.nguyenhuugiap.computer_shop.dto.user.RoleAssignmentRequest;
 import com.nguyenhuugiap.computer_shop.dto.user.UserCreationRequest;
 import com.nguyenhuugiap.computer_shop.dto.user.UserUpdateRequest;
 import com.nguyenhuugiap.computer_shop.dto.user.UserResponse;
@@ -113,5 +114,34 @@ public class UserServiceImpl implements UserService {
         User use = userRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toResponse(use);
+    }
+
+    @Override
+    public void assignRoleToUser(Long userId, RoleAssignmentRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Role role = roleRepository.findByName(request.getRoleName()).orElseThrow(() ->
+                new AppException(ErrorCode.ROLE_NOT_FOUND));
+
+
+        user.getRoles().add(role);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void revokeRoleFromUser(Long userId, RoleAssignmentRequest request) {
+        String currentLoggedInUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (userId.toString().equals(currentLoggedInUser)) {
+            throw new AppException(ErrorCode.CANNOT_SELF_REVOKE_ROLE);
+        }
+        Role role = roleRepository.findByName(request.getRoleName()).orElseThrow(() ->
+                new AppException(ErrorCode.ROLE_NOT_FOUND));
+
+        user.getRoles().remove(role);
+        userRepository.save(user);
     }
 }

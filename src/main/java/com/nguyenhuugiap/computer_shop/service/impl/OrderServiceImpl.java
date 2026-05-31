@@ -4,7 +4,9 @@ import com.nguyenhuugiap.computer_shop.dto.PageResponse;
 import com.nguyenhuugiap.computer_shop.dto.order.*;
 import com.nguyenhuugiap.computer_shop.entity.*;
 import com.nguyenhuugiap.computer_shop.enums.OrderStatus;
+import com.nguyenhuugiap.computer_shop.enums.PaymentMethod;
 import com.nguyenhuugiap.computer_shop.enums.PaymentStatus;
+import com.nguyenhuugiap.computer_shop.event.OrderPlaceEvent;
 import com.nguyenhuugiap.computer_shop.exception.AppException;
 import com.nguyenhuugiap.computer_shop.exception.ErrorCode;
 import com.nguyenhuugiap.computer_shop.mapper.OrderMapper;
@@ -19,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -45,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
     ProductVariantRepository productVariantRepository;
     CartService cartService;
     final BigDecimal SHIPPING_FEE = new BigDecimal(10000);
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override
@@ -104,8 +109,13 @@ public class OrderServiceImpl implements OrderService {
             cartService.removeItems(null, variantIds);
         }
 
-        // Save order
-        return orderMapper.toResponse(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+        if (savedOrder.getPaymentMethod() == PaymentMethod.COD) {
+            tryAutoConfirm(savedOrder.getId());
+        }
+        //Event cod
+        eventPublisher.publishEvent(new OrderPlaceEvent(this, savedOrder.getId()));
+        return orderMapper.toResponse(savedOrder);
     }
 
     private User getUser() {
@@ -289,11 +299,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(OrderStatus.CANCELLED)
                 .note(prefix + " Lý do: " + reason).build();
         order.addStatusHistory(history);
-
-        for (OrderItem item : order.getOrderItems()) {
-            Long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
-            if (updated == 0) throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
-        }
+        restoreInventory(order.getOrderItems());
         orderRepository.save(order);
     }
 
@@ -301,6 +307,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updateStatus(Long orderId, UpdateOrderStatusRequest request) {
         Order order = getOrderEntity(orderId);
+        OrderStatus newStatus = request.getStatus();
+
         if (order.getStatus().equals(OrderStatus.CANCELLED) || order.getStatus().equals(OrderStatus.RETURNED))
             throw new AppException(ErrorCode.ORDER_ALREADY_FINALIZED);
 
@@ -309,6 +317,19 @@ public class OrderServiceImpl implements OrderService {
 
         if (request.getStatus().equals(OrderStatus.CANCELLED))
             throw new AppException(ErrorCode.INVALID_STATUS_UPDATE_USE_CANCEL_API);
+
+        if (!isValidStatusTransition(order.getStatus(), request.getStatus()))
+            throw new AppException(ErrorCode.INVALID_STATUS_TRANSITION);
+
+        if (newStatus.equals(OrderStatus.DELIVERED)) {
+            if (order.getPaymentMethod() == PaymentMethod.COD)
+                order.setPaymentStatus(PaymentStatus.PAID);
+        } else if (newStatus.equals(OrderStatus.RETURNED)) {
+            restoreInventory(order.getOrderItems());
+            if (order.getPaymentMethod() == PaymentMethod.VNPAY && order.getPaymentStatus() == PaymentStatus.PAID) {
+                order.setPaymentStatus(PaymentStatus.REFUNDED);
+            }
+        }
         order.setStatus(request.getStatus());
 
         OrderStatusHistory history = OrderStatusHistory.builder()
@@ -316,13 +337,19 @@ public class OrderServiceImpl implements OrderService {
                 .note(request.getNote()).build();
         order.addStatusHistory(history);
 
-        //Todo: Không cho phép nhảy từ PENDING thẳng lên DELIVERED)
         orderRepository.save(order);
     }
 
     @Override
     public void handlePaymentCallback(String orderCode, boolean isSuccess) {
 
+    }
+
+    private void restoreInventory(List<OrderItem> orderItems) {
+        for (OrderItem item : orderItems) {
+            Long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
+            if (updated == 0) throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
+        }
     }
 
     @Transactional
@@ -332,5 +359,79 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentStatus(paymentStatus);
     }
 
+
+    // Dung requires new de moi don hang la mot transaction doc lap
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void cancelOrderSystem(Long orderId) {
+        Order order = getOrderEntity(orderId);
+        if (order.getStatus() != OrderStatus.PENDING) return;
+        if (order.getPaymentMethod() == PaymentMethod.COD) return;
+        if (order.getPaymentStatus() != PaymentStatus.UNPAID) return;
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setPaymentStatus(PaymentStatus.EXPIRED);
+
+        // roll back stock
+        for (OrderItem item : order.getOrderItems()) {
+            long updated = productVariantRepository.addStock(item.getProductVariant().getId(), Long.valueOf(item.getQuantity()));
+            if (updated == 0) {
+                throw new AppException(ErrorCode.FAILED_TO_UPDATE_STOCK);
+            }
+        }
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .order(order)
+                .status(OrderStatus.CANCELLED)
+                .note("System: Tự động hủy đơn do quá hạn thanh toán VNPay")
+                .build();
+        order.addStatusHistory(history);
+        orderRepository.save(order);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void tryAutoConfirm(Long orderId) {
+        Order order = getOrderEntity(orderId);
+        if (order.getStatus() != OrderStatus.PENDING) {
+            log.info("Order {} is not PENDING. Skip auto-confirm.", order.getOrderCode());
+            return;
+        }
+
+        if (!order.isValidTransition(OrderStatus.CONFIRMED)) {
+            log.warn("Invalid state transition for Order {}.", order.getOrderCode());
+            return;
+        }
+
+        // Domain Business Check: Does it meet the criteria?
+        if (!order.canAutoConfirm()) {
+            log.info("Order {} does not meet auto-confirm conditions.", order.getOrderCode());
+            return;
+        }
+
+        // Execute the confirmation logic.
+        confirmOrder(order);
+    }
+
+    private void confirmOrder(Order order) {
+        order.setStatus(OrderStatus.CONFIRMED);
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .status(OrderStatus.CONFIRMED)
+                .note("System: Đơn hàng tự động xác nhận (Auto-Confirmed) đủ điều kiện hợp lệ.")
+                .build();
+        order.addStatusHistory(history);
+        // Save entity. Optimistic lock (@Version) will throw exception if race condition occurs.
+        orderRepository.save(order);
+        log.info("Successfully auto-confirmed Order: {}", order.getOrderCode());
+    }
+
+    private boolean isValidStatusTransition(OrderStatus current, OrderStatus next) {
+        return switch (current) {
+            case PENDING -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
+            case CONFIRMED -> next == OrderStatus.PROCESSING || next == OrderStatus.CANCELLED;
+            case PROCESSING -> next == OrderStatus.SHIPPING || next == OrderStatus.CANCELLED;
+            case SHIPPING -> next == OrderStatus.DELIVERED || next == OrderStatus.RETURNED;
+            case DELIVERED -> next == OrderStatus.COMPLETED || next == OrderStatus.RETURNED;
+            default -> false;
+        };
+    }
 
 }
